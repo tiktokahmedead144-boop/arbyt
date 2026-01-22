@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script> 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script> 
   <style>
+        /* --- التصميم الأصلي + إضافات جديدة --- */
         :root { 
             --main: #4a90e2; --sec: #2ecc71; --vocab: #9b59b6; 
             --video: #e67e22; --err: #e74c3c; --bg: #f4f7f6; 
@@ -113,12 +114,12 @@
     <button class="btn btn-sec" onclick="showTab('tab-l')">📚 المكتبة</button> 
     <button class="btn btn-video" onclick="showTab('tab-v')">🎬 الفيديوهات</button> 
     
-    <button class="btn btn-outline" style="color:#e67e22; border-color:#e67e22;" onclick="showTab('tab-posts')">📢 المنشورات والتعليقات</button>
+    <button class="btn btn-outline" style="color:#e67e22; border-color:#e67e22;" onclick="showTab('tab-posts')">📢 منشورات المعلم</button>
     <button class="btn btn-outline" onclick="showTab('tab-mng'); loadManageExams();">📝 إدارة المحتوى</button> 
     <button class="btn btn-outline" onclick="showTab('tab-msgs'); loadMessagesList();">📩 الرسائل</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-users'); loadStudents();">👥 تقارير الطلاب</button> 
+    <button class="btn btn-outline" onclick="showTab('tab-users'); loadStudents();">👥 الطلاب</button> 
     <button class="btn btn-outline" onclick="showTab('tab-rules'); loadBadgeRules();">🏅 الجوائز</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-pub'); loadPubComments();">🌍 مجتمع التعليقات</button> 
+    <button class="btn btn-outline" onclick="showTab('tab-pub'); loadPubComments();">🌍 المجتمع</button> 
     <button class="btn btn-outline" onclick="showTab('tab-results'); loadStudentResults();">📊 النتائج</button> 
     <button class="btn btn-outline" onclick="showTab('tab-settings')" style="color:#4a90e2;">🛠️ الإعدادات</button> 
     <button class="btn btn-outline" onclick="adminLogout()" style="color:red; flex:0;">خروج</button> 
@@ -129,11 +130,7 @@
     <div style="background:#f0f9ff; padding:15px; border-radius:15px; border:1px solid #bae6fd;"> 
      <input id="exam-title" placeholder="عنوان الامتحان (مثلاً: اختبار الأسبوع الأول - أكتوبر)"> 
      <div style="display:flex; gap:10px;"> 
-         <select id="exam-grade"> 
-            <option value="all">🌍 عام لكل المراحل</option>
-            <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option> 
-            <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option> 
-         </select> 
+         <select id="exam-grade"> <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option> <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option> </select> 
          <select id="exam-subject"> <option value="grammar">نحو</option> <option value="vocab">مفردات</option> </select> 
      </div> 
      <select id="exam-category"> 
@@ -177,8 +174,7 @@
            <p style="margin:0 0 10px;">قم باختيار صف ومادة لعرض الامتحانات، ثم حدد الامتحانات المراد دمجها لإنشاء نسخة مجمعة جديدة.</p>
            <div style="display:flex; gap:10px;">
                <select id="merge-grade" onchange="loadExamsForMerge()">
-                   <option value="">-- اختر الصف المُراد الدمج منه --</option>
-                   <option value="all">الامتحانات العامة (Global)</option>
+                   <option value="">-- اختر الصف --</option>
                    <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
                    <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
                </select>
@@ -193,12 +189,6 @@
        <div style="border-top:1px solid #eee; padding-top:15px;">
            <h4>بيانات الامتحان الجديد المجمع:</h4>
            <input id="new-merge-title" placeholder="اسم الامتحان الجديد (مثلاً: المراجعة الشاملة - ترم أول)">
-           <select id="new-merge-grade">
-                <option value="">-- اختر صف الامتحان الجديد --</option>
-                <option value="all">🌍 عام لكل المراحل</option>
-                <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
-                <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
-           </select>
            <select id="new-merge-category"> 
                 <option value="">-- اختر تصنيف الجديد --</option> 
                 <option value="شامل">شامل</option> <option value="ترم1">ترم أول</option> <option value="ترم2">ترم ثاني</option> 
@@ -234,7 +224,7 @@
    </div> 
 
    <div id="tab-posts" class="admin-tab">
-       <h3>📢 إدارة المنشورات والتعليقات</h3>
+       <h3>📢 منشورات المعلم (Wall)</h3>
        <div style="background:#fff0f6; padding:15px; border-radius:15px; border:1px solid #ffdeeb;">
            <input id="post-title" placeholder="عنوان المنشور">
            <textarea id="post-body" rows="4" placeholder="اكتب المنشور هنا..."></textarea>
@@ -252,7 +242,7 @@
            
            <button class="btn btn-main" style="background:#e67e22; margin-top:10px;" onclick="createPost()">نشر المنشور</button>
        </div>
-       <h3 style="margin-top:20px;">المنشورات الحالية (اضغط لعرض التعليقات):</h3>
+       <h3 style="margin-top:20px;">سجل المنشورات الحالية:</h3>
        <div id="posts-list-manage"></div>
    </div>
 
@@ -285,16 +275,16 @@
     </div> 
    </div> 
    <div id="tab-users" class="admin-tab"> 
-    <h3>قائمة الطلاب وتقاريرهم</h3> 
+    <h3>قائمة الطلاب</h3> 
     <div style="overflow-x:auto;"> 
      <table class="results-table"> 
-      <thead><tr><th>اسم الطالب</th><th>الصف</th><th>البريد</th><th>إجراءات / تقارير</th></tr></thead> 
+      <thead><tr><th>اسم الطالب</th><th>الصف</th><th>البريد</th><th>إجراءات</th></tr></thead> 
       <tbody id="users-body"><tr><td colspan="4">جاري التحميل...</td></tr></tbody> 
      </table> 
     </div> 
    </div> 
    <div id="tab-rules" class="admin-tab"> 
-    <h3>قواعد الجوائز التلقائية</h3> 
+    <h3>قواعد الجوائز</h3> 
     <div style="background:#fffbe6; padding:10px; margin-bottom:10px; border:1px solid #ffe58f;"> 
      <input id="badge-title" placeholder="اسم الشارة"> <input id="badge-icon" placeholder="الأيقونة (fas fa-star)"> 
      <select id="badge-cond"><option value="exams_count">عدد الاختبارات</option><option value="perfect_score">الدرجات النهائية</option></select> 
@@ -303,7 +293,7 @@
     <div id="rules-list"></div> 
    </div> 
    <div id="tab-pub" class="admin-tab"> 
-    <h3>مجتمع التعليقات العام</h3> <div id="adm-pub-list"></div> 
+    <h3>تعليقات المجتمع</h3> <div id="adm-pub-list"></div> 
    </div> 
    <div id="tab-results" class="admin-tab"> 
     <h3>سجل الدرجات</h3> <button class="btn-small-danger" onclick="clearResults()">حذف الكل</button> 
@@ -328,63 +318,6 @@
     </div> <button class="btn btn-main" onclick="saveSiteSettings()">حفظ الإعدادات</button> 
    </div> 
   </div> 
-
-  <div id="modal-post-comments" class="modal">
-      <div class="modal-content">
-          <span class="modal-close" onclick="document.getElementById('modal-post-comments').style.display='none'">×</span>
-          <h3>تعليقات المنشور</h3>
-          <input type="hidden" id="current-post-id-mng">
-          <div id="post-comments-list-mng" style="max-height:300px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:10px; border-radius:10px;"></div>
-          <div style="display:flex; gap:5px;">
-             <input id="post-reply-admin" placeholder="اكتب رداً كمعلم...">
-             <button class="btn btn-main" style="width:auto;" onclick="sendAdminReplyPost()">رد</button>
-          </div>
-      </div>
-  </div>
-
-  <div id="modal-student-report" class="modal">
-      <div class="modal-content">
-          <span class="modal-close" onclick="document.getElementById('modal-student-report').style.display='none'">×</span>
-          <h3 style="border-bottom:2px solid var(--main); padding-bottom:10px;">تقرير الطالب: <span id="rep-stu-name"></span></h3>
-          <div style="background:#f0f9ff; padding:15px; border-radius:10px; margin-bottom:15px;">
-              <p><b>الصف الدراسي:</b> <span id="rep-stu-grade"></span></p>
-              <p><b>تاريخ الانضمام:</b> <span id="rep-stu-date"></span></p>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                  <div style="background:white; padding:10px; text-align:center; border-radius:8px;">
-                      <h4 style="margin:0; color:var(--main);">عدد الاختبارات</h4>
-                      <span id="rep-total-exams" style="font-size:20px; font-weight:bold;">0</span>
-                  </div>
-                  <div style="background:white; padding:10px; text-align:center; border-radius:8px;">
-                      <h4 style="margin:0; color:var(--sec);">متوسط الدرجات</h4>
-                      <span id="rep-avg-score" style="font-size:20px; font-weight:bold;">0%</span>
-                  </div>
-              </div>
-          </div>
-          
-          <h4>الأوسمة والجوائز الحالية:</h4>
-          <div id="rep-badges-list" style="display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#fffbe6; border-radius:10px; min-height:50px;"></div>
-          
-          <button class="btn btn-sec" style="margin-top:20px;" onclick="openGiveBadgeModal()">منح وسام يدوي ✨</button>
-      </div>
-  </div>
-
-  <div id="modal-give-badge" class="modal" style="z-index:21000;">
-      <div class="modal-content" style="max-width:400px;">
-          <span class="modal-close" onclick="document.getElementById('modal-give-badge').style.display='none'">×</span>
-          <h3>منح وسام خاص</h3>
-          <input type="hidden" id="badge-target-uid">
-          <input id="manual-badge-title" placeholder="عنوان الوسام (مثلاً: الطالب المثالي)">
-          <input id="manual-badge-icon" placeholder="رمز الأيقونة (مثلاً: fas fa-crown)">
-          <input id="manual-badge-reason" placeholder="سبب المنح (اختياري)">
-          <select id="manual-badge-color">
-              <option value="gold">ذهبي</option>
-              <option value="silver">فضي</option>
-              <option value="#3498db">أزرق</option>
-              <option value="#e74c3c">أحمر</option>
-          </select>
-          <button class="btn btn-main" onclick="confirmGiveBadge()">منح الوسام الآن</button>
-      </div>
-  </div>
 
   <div id="modal-edit" class="modal"> 
    <div class="modal-content"> <span onclick="document.getElementById('modal-edit').style.display='none'" class="modal-close">×</span> 
@@ -412,7 +345,6 @@
               <div style="display:flex; gap:10px;">
                 <div style="flex:1;"><label>الصف:</label> 
                     <select id="deep-grade">
-                        <option value="all">عام</option>
                         <option value="4">4</option><option value="5">5</option><option value="6">6</option>
                         <option value="7">7</option><option value="8">8</option><option value="9">9</option>
                     </select>
@@ -448,7 +380,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        const gradeNames = { "4": "رابع", "5": "خامس", "6": "سادس", "7": "أول ع", "8": "ثاني ع", "9": "ثالث ع", "all": "عام" };
+        const gradeNames = { "4": "رابع", "5": "خامس", "6": "سادس", "7": "أول ع", "8": "ثاني ع", "9": "ثالث ع" };
 
         function showLoader() { document.getElementById('global-loader').style.display = 'flex'; }
         function hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
@@ -499,10 +431,9 @@
                 sel.innerHTML = '<option value="">-- اختر الامتحان --</option>';
                 snap.forEach(doc=>{
                     const e = doc.data();
-                    const gName = e.grade === 'all' ? 'عام' : e.grade;
                     const opt = document.createElement('option');
                     opt.value = doc.id;
-                    opt.innerText = `${e.title} (${gName} - ${e.category})`;
+                    opt.innerText = `${e.title} (${e.grade} - ${e.category})`;
                     sel.appendChild(opt);
                 });
             });
@@ -533,7 +464,7 @@
             } catch(e) { Swal.fire('خطأ JSON','','error'); }
         }
 
-        // --- 3. MERGE & CLONE ---
+        // --- 3. MERGE & CLONE (NEW FEATURE) ---
         function loadExamsForMerge() {
             const grade = document.getElementById('merge-grade').value;
             const subject = document.getElementById('merge-subject').value;
@@ -557,20 +488,23 @@
         async function executeMerge() {
             const checks = document.querySelectorAll('.merge-chk:checked');
             const newTitle = document.getElementById('new-merge-title').value;
-            const newGrade = document.getElementById('new-merge-grade').value;
             const newCat = document.getElementById('new-merge-category').value;
+            const grade = document.getElementById('merge-grade').value;
             const subject = document.getElementById('merge-subject').value;
 
-            if(checks.length === 0 || !newTitle || !newCat || !newGrade) return Swal.fire('تنبيه', 'أكمل جميع البيانات', 'warning');
+            if(checks.length === 0 || !newTitle || !newCat) return Swal.fire('تنبيه', 'اختر اختبارات وضع عنواناً وتصنيفاً جديداً', 'warning');
 
             showLoader();
             try {
+                // 1. Create New Exam
                 const newExamRef = await db.collection('exams').add({
-                    title: newTitle, grade: newGrade, subject, category: newCat, createdAt: new Date().toISOString(), isMerged: true
+                    title: newTitle, grade, subject, category: newCat, createdAt: new Date().toISOString(), isMerged: true
                 });
 
+                // 2. Clone Questions
                 const batch = db.batch();
                 let count = 0;
+                
                 for (const chk of checks) {
                     const qSnap = await db.collection('questions').where('examId', '==', chk.value).get();
                     qSnap.forEach(qDoc => {
@@ -580,6 +514,7 @@
                         count++;
                     });
                 }
+                
                 await batch.commit();
                 hideLoader();
                 Swal.fire('نجاح', `تم إنشاء "${newTitle}" ونسخ ${count} سؤال إليه بنجاح.`, 'success');
@@ -592,7 +527,7 @@
             }
         }
 
-        // --- 4 & 5. Lessons & Videos ---
+        // --- 4 & 5. Lessons & Videos (Updated for Global Content) ---
         function saveLesson() { 
             db.collection("lessons").add({ 
                 grade: document.getElementById('in-l-grade').value, 
@@ -609,7 +544,7 @@
             }).then(() => Swal.fire('تم النشر', '', 'success')); 
         }
 
-        // --- 6. TEACHER POSTS & COMMENTS (UPDATED) ---
+        // --- 6. TEACHER POSTS (NEW FEATURE) ---
         function togglePostAttach(){
             const type = document.getElementById('post-attach-type').value;
             const sel = document.getElementById('post-attach-id');
@@ -657,50 +592,15 @@
                 if(snap.empty) div.innerHTML = '<p>لا توجد منشورات</p>';
                 snap.forEach(doc => {
                     const p = doc.data();
-                    div.innerHTML += `<div style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:10px; background:#fff; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <b>${p.title}</b> <small>${new Date(p.date).toLocaleDateString()}</small><br>
-                            <span style="font-size:12px; color:#555; cursor:pointer; text-decoration:underline;" onclick="openPostComments('${doc.id}')">💬 عرض التعليقات والرد</span>
-                        </div>
-                        <button class="btn-del" onclick="db.collection('posts').doc('${doc.id}').delete().then(()=>loadManagePosts())">حذف المنشور</button>
+                    div.innerHTML += `<div style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:10px; background:#fff; display:flex; justify-content:space-between;">
+                        <div><b>${p.title}</b> <small>${new Date(p.date).toLocaleDateString()}</small></div>
+                        <button class="btn-del" onclick="db.collection('posts').doc('${doc.id}').delete().then(()=>loadManagePosts())">حذف</button>
                     </div>`;
                 });
-            });
-        }
-        function openPostComments(postId){
-            document.getElementById('current-post-id-mng').value = postId;
-            document.getElementById('modal-post-comments').style.display='flex';
-            const list = document.getElementById('post-comments-list-mng');
-            
-            db.collection('posts').doc(postId).collection('comments').orderBy('time').onSnapshot(snap => {
-                list.innerHTML = '';
-                if(snap.empty) { list.innerHTML = '<p>لا توجد تعليقات</p>'; return; }
-                snap.forEach(d => {
-                    const c = d.data();
-                    list.innerHTML += `<div style="background:#f9f9f9; padding:8px; border-radius:5px; margin-bottom:5px; border-bottom:1px solid #eee;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <b>${c.name}</b>
-                            <span style="color:red; cursor:pointer; font-size:12px;" onclick="db.collection('posts').doc('${postId}').collection('comments').doc('${d.id}').delete()">🗑️</span>
-                        </div>
-                        <div>${c.text}</div>
-                        ${c.reply ? `<div style="color:var(--main); font-size:12px;">↳ ردك: ${c.reply}</div>` : ''}
-                    </div>`;
-                });
-            });
-        }
-        function sendAdminReplyPost() {
-            const pid = document.getElementById('current-post-id-mng').value;
-            const txt = document.getElementById('post-reply-admin').value;
-            if(!txt) return;
-            // Add a new comment as admin
-            db.collection('posts').doc(pid).collection('comments').add({
-                name: 'المعلم (Admin)', text: txt, time: new Date().toISOString(), isTeacher: true
-            }).then(() => {
-                document.getElementById('post-reply-admin').value = '';
             });
         }
 
-        // --- 7. Manage Content ---
+        // --- 7. Manage Content (Updated: Filter & Deep Edit) ---
         let manageCache = [];
         function loadManageExams() {
             const list = document.getElementById('mng-list');
@@ -727,7 +627,7 @@
             list.innerHTML = items.map(i => {
                 if(i.type === 'exam') {
                     return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;">
-                        <div><b>${i.title}</b> <span style="font-size:12px; color:#888;">(${i.grade==='all'?'عام':i.grade} - ${i.category})</span></div>
+                        <div><b>${i.title}</b> <span style="font-size:12px; color:#888;">(${i.grade} - ${i.category})</span></div>
                         <div>
                             <button class="btn-edit" onclick="openDeepEdit('${i.id}')">تعديل شامل</button>
                             <button class="btn-del" onclick="deleteExamFinal('${i.id}')"><i class="fas fa-trash"></i></button>
@@ -760,6 +660,7 @@
             });
         }
         
+        // Simple Edit (Lessons/Videos)
         function openSimpleEdit(id, c, g) { 
             document.getElementById('edit-id').value = id; document.getElementById('edit-col').value = c; 
             document.getElementById('edit-grade').value = g; document.getElementById('modal-edit').style.display = 'flex'; 
@@ -770,7 +671,7 @@
               .then(() => { document.getElementById('modal-edit').style.display = 'none'; Swal.fire('تم'); loadManageData(col); }); 
         }
 
-        // Deep Edit (Exams)
+        // Deep Edit (Exams - NEW FEATURE)
         let currentEditingExamId = null;
         function openDeepEdit(id) {
             currentEditingExamId = id;
@@ -823,7 +724,7 @@
             }
         }
 
-        // --- 8. Messages ---
+        // --- Other Features (Messages, Users, etc. - UNTOUCHED) ---
         function loadMessagesList(){
             db.collection('messages').orderBy('lastTime','desc').limit(20).onSnapshot(snap=>{
                 const l = document.getElementById('msg-list'); l.innerHTML = '';
@@ -842,88 +743,14 @@
         }
         function sendReply(){ const t=document.getElementById('adm-reply-inp').value; if(t && selectedChatUid) { db.collection('messages').doc(selectedChatUid).collection('chat').add({text:t, sender:'admin', timestamp:new Date().toISOString()}); document.getElementById('adm-reply-inp').value=''; } }
         
-        // --- 9. Students & Reporting (NEW) ---
         function loadStudents(){
             const tb = document.getElementById('users-body'); tb.innerHTML = '<tr><td colspan="4">جاري التحميل...</td></tr>';
             db.collection('users').limit(50).get().then(snap=>{
                 tb.innerHTML = '';
-                snap.forEach(d=>{ 
-                    const u = d.data(); 
-                    tb.innerHTML += `<tr>
-                        <td>${u.name}</td><td>${u.grade}</td><td>${u.email}</td>
-                        <td style="display:flex; justify-content:center;">
-                            <button class="btn-report" onclick="openStudentReport('${d.id}', '${u.name}', '${u.grade}', '${u.joinDate||''}')">📑 تقرير</button>
-                            <button class="btn-del" onclick="if(confirm('حذف؟')) db.collection('users').doc('${d.id}').delete().then(()=>loadStudents())">حذف</button>
-                        </td>
-                    </tr>`; 
-                });
-            });
-        }
-
-        let currentReportUid = null;
-        function openStudentReport(uid, name, grade, date) {
-            currentReportUid = uid;
-            document.getElementById('rep-stu-name').innerText = name;
-            document.getElementById('rep-stu-grade').innerText = grade;
-            document.getElementById('rep-stu-date').innerText = date ? new Date(date).toLocaleDateString('ar-EG') : 'غير مسجل';
-            document.getElementById('rep-badges-list').innerHTML = 'جاري التحميل...';
-            document.getElementById('modal-student-report').style.display = 'flex';
-
-            // Calculate Stats
-            db.collection('results').where('uid', '==', uid).get().then(snap => {
-                const total = snap.size;
-                let sum = 0;
-                snap.forEach(r => { sum += (r.data().score / r.data().total); });
-                const avg = total > 0 ? Math.round((sum / total) * 100) : 0;
-                
-                document.getElementById('rep-total-exams').innerText = total;
-                document.getElementById('rep-avg-score').innerText = avg + '%';
-            });
-
-            // Load Badges
-            db.collection('user_badges').where('uid', '==', uid).get().then(snap => {
-                const bList = document.getElementById('rep-badges-list');
-                bList.innerHTML = '';
-                if(snap.empty) bList.innerHTML = '<span style="color:#777">لا يوجد أوسمة حتى الآن</span>';
-                snap.forEach(b => {
-                    const data = b.data();
-                    bList.innerHTML += `<div style="text-align:center; padding:5px; border:1px solid #eee; background:white; border-radius:5px;">
-                        <i class="${data.icon}" style="color:${data.color}; font-size:20px;"></i>
-                        <div style="font-size:11px;">${data.title}</div>
-                    </div>`;
-                });
+                snap.forEach(d=>{ const u = d.data(); tb.innerHTML += `<tr><td>${u.name}</td><td>${u.grade}</td><td>${u.email}</td><td><button class="btn-del" onclick="if(confirm('حذف؟')) db.collection('users').doc('${d.id}').delete().then(()=>loadStudents())">حذف</button></td></tr>`; });
             });
         }
         
-        function openGiveBadgeModal() {
-            document.getElementById('badge-target-uid').value = currentReportUid;
-            document.getElementById('modal-give-badge').style.display = 'flex';
-        }
-        function confirmGiveBadge() {
-            const uid = document.getElementById('badge-target-uid').value;
-            const title = document.getElementById('manual-badge-title').value;
-            const icon = document.getElementById('manual-badge-icon').value;
-            const reason = document.getElementById('manual-badge-reason').value;
-            const color = document.getElementById('manual-badge-color').value;
-
-            if(!title || !icon) return Swal.fire('تنبيه','الاسم والأيقونة مطلوبان','warning');
-
-            db.collection('user_badges').add({
-                uid: uid,
-                title: title,
-                icon: icon,
-                color: color,
-                reason: reason,
-                timestamp: new Date().toISOString(),
-                isManual: true
-            }).then(() => {
-                document.getElementById('modal-give-badge').style.display = 'none';
-                Swal.fire('تم', 'تم منح الوسام للطالب بنجاح', 'success');
-                openStudentReport(uid, document.getElementById('rep-stu-name').innerText, document.getElementById('rep-stu-grade').innerText, ''); // Refresh report
-            });
-        }
-        
-        // --- 10. Rules & Community ---
         function createRule(){
             const t=document.getElementById('badge-title').value; const i=document.getElementById('badge-icon').value; const c=document.getElementById('badge-cond').value; const th=Number(document.getElementById('badge-thresh').value);
             db.collection('badges_rules').add({title:t, icon:i, condition:c, threshold:th, type:'auto', color:'gold'}).then(()=>{ Swal.fire('تم'); loadBadgeRules(); });
@@ -936,15 +763,7 @@
         function loadPubComments(){
             db.collection('public_comments').orderBy('time','desc').limit(20).onSnapshot(s=>{
                 document.getElementById('adm-pub-list').innerHTML = s.docs.map(d=>{
-                    return `<div style="border:1px solid #eee; padding:10px; margin-bottom:5px;">
-                        <b>${d.data().name}</b>: ${d.data().text} 
-                        <div style="margin-top:5px;">
-                             ${d.data().reply ? `<div style="color:green; font-size:12px;">ردك: ${d.data().reply}</div>` : ''}
-                             <input id="rep-${d.id}" placeholder="رد..." style="width:60%; display:inline-block;">
-                             <button onclick="db.collection('public_comments').doc('${d.id}').update({reply:document.getElementById('rep-${d.id}').value})" class="btn-sec">رد</button> 
-                             <button class="btn-del" onclick="db.collection('public_comments').doc('${d.id}').delete()">حذف</button>
-                        </div>
-                    </div>`;
+                    return `<div style="border:1px solid #eee; padding:10px; margin-bottom:5px;"><b>${d.data().name}</b>: ${d.data().text} <div style="margin-top:5px;"><input id="rep-${d.id}" placeholder="رد..." style="width:60%; display:inline-block;"><button onclick="db.collection('public_comments').doc('${d.id}').update({reply:document.getElementById('rep-${d.id}').value})" class="btn-sec">رد</button> <button class="btn-del" onclick="db.collection('public_comments').doc('${d.id}').delete()">حذف</button></div></div>`;
                 }).join('');
             });
         }
@@ -957,8 +776,3 @@
   </script> 
  
 </body></html>
-
-
-
-
-
