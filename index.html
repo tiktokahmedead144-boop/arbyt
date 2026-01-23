@@ -4,15 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة منصة لغتي هويتي - المطور</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
     <style>
         :root {
             --main: #4a90e2; --sec: #2ecc71; --vocab: #9b59b6;
@@ -54,6 +51,7 @@
         .btn-report { background: #e0e7ff; color: #6366f1; border: 1px solid #c7d2fe; width: auto; padding: 6px 12px; font-size: 12px; margin-left: 5px; border-radius: 6px; cursor: pointer; }
         .btn-outline { background: #fff; border: 2px solid #e2e8f0; color: #64748b; box-shadow: none; }
         .btn-outline:hover { border-color: var(--main); color: var(--main); }
+        .btn-small-danger { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; width: auto; padding: 6px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; }
 
         /* Navigation */
         .admin-nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
@@ -64,8 +62,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Cards & Containers in Admin */
-        .admin-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-        .admin-card h3 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; }
+        .admin-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .admin-card h3 { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
 
         /* Login */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 10000; display: flex; justify-content: center; align-items: center; }
@@ -83,9 +81,20 @@
         .spinner { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: var(--main); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to {transform: rotate(360deg);} }
 
-        /* Merge Checkboxes */
-        .check-exam-box { padding: 10px; border: 1px solid #eee; margin-bottom: 5px; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #fff; cursor: pointer; }
-        .check-exam-box:hover { background: #f0f9ff; border-color: #bae6fd; }
+        /* Merge Checkboxes - Enhanced */
+        .search-container { position: relative; margin-bottom: 10px; }
+        .search-icon { position: absolute; left: 15px; top: 12px; color: #94a3b8; }
+        #exam-search-input { padding-left: 35px; border-color: #fed7aa; background: #fff; }
+        #exam-search-input:focus { border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1); }
+        
+        .check-exam-box { 
+            padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .check-exam-box:hover { background: #fff7ed; }
+        .check-exam-box input[type="checkbox"] { width: 18px; height: 18px; margin: 0; cursor: pointer; accent-color: #ea580c; }
+        .check-exam-box span { font-size: 14px; color: #334155; }
+        .check-exam-box small { color: #94a3b8; display: block; font-size: 11px; margin-top: 2px; }
 
         /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 20000; justify-content: center; align-items: center; padding: 15px; backdrop-filter: blur(2px); }
@@ -106,7 +115,9 @@
     </style>
 </head>
 <body>
-    <div id="global-loader"> <div class="spinner"></div> </div>
+    <div id="global-loader">
+        <div class="spinner"></div>
+    </div>
 
     <div id="login-overlay">
         <div id="login-box">
@@ -145,65 +156,111 @@
         </div>
 
         <div id="tab-create-exam" class="admin-tab" style="display: block;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="admin-card">
-                    <h3 style="color:var(--main);"><i class="fas fa-plus"></i> إنشاء امتحان جديد</h3>
-                    <input id="exam-title" placeholder="عنوان الامتحان">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <select id="exam-grade">
-                            <option value="all">الجميع (كل المراحل)</option>
-                            <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
-                            <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
-                        </select>
-                        <select id="exam-subject">
-                            <option value="grammar">نحو</option>
-                            <option value="vocab">مفردات</option>
-                        </select>
+            
+            <div class="admin-card">
+                <h3 style="color:var(--main);"><i class="fas fa-plus-circle"></i> إنشاء امتحان جديد</h3>
+                <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <label>عنوان الامتحان:</label>
+                    <input id="exam-title" placeholder="اكتب عنوان الامتحان هنا...">
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; margin-bottom: 15px;">
+                        <div>
+                            <label>الصف الدراسي:</label>
+                            <select id="exam-grade">
+                                <option value="all">الجميع (كل المراحل)</option>
+                                <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
+                                <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>المادة:</label>
+                            <select id="exam-subject">
+                                <option value="grammar">نحو</option>
+                                <option value="vocab">مفردات</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>التصنيف (المجلد):</label>
+                            <select id="exam-category">
+                                <option value="">-- اختر التصنيف --</option>
+                                <option value="أسبوعي">تقييمات أسبوعية</option>
+                                <option value="شامل">امتحانات شاملة</option>
+                                <option value="ترم1">ترم أول</option>
+                                <option value="ترم2">ترم ثاني</option>
+                                <option value="أكتوبر">أكتوبر</option>
+                                <option value="نوفمبر">نوفمبر</option>
+                                <option value="ديسمبر">ديسمبر</option>
+                                <option value="فبراير">فبراير</option>
+                                <option value="مارس">مارس</option>
+                                <option value="أبريل">أبريل</option>
+                            </select>
+                        </div>
                     </div>
-                    <select id="exam-category">
-                        <option value="">-- اختر التصنيف (المجلد) --</option>
-                        <option value="أسبوعي">تقييمات أسبوعية</option>
-                        <option value="شامل">امتحانات شاملة</option>
-                        <option value="ترم1">ترم أول</option>
-                        <option value="ترم2">ترم ثاني</option>
-                        <option value="أكتوبر">أكتوبر</option>
-                        <option value="نوفمبر">نوفمبر</option>
-                        <option value="ديسمبر">ديسمبر</option>
-                        <option value="فبراير">فبراير</option>
-                        <option value="مارس">مارس</option>
-                        <option value="أبريل">أبريل</option>
-                    </select>
-                    <button class="btn btn-main" onclick="createExam()">حفظ الامتحان</button>
+                    <button class="btn btn-main" onclick="createExam()" style="width: 200px; float: left; margin-top: 10px;">
+                        <i class="fas fa-save"></i> حفظ الامتحان
+                    </button>
+                    <div style="clear:both;"></div>
                 </div>
+            </div>
 
-                <div class="admin-card" style="border-color:#fed7aa;">
-                    <h3 style="color:#ea580c;"><i class="fas fa-random"></i> دمج امتحانات (نسخ الأسئلة)</h3>
-                    <label>1. اختر الامتحانات للدمج:</label>
-                    <div id="merge-source-list" style="height: 150px; overflow-y: auto; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
-                        جاري التحميل...
+            <div class="admin-card" style="border-left: 5px solid #ea580c; border-right: 1px solid #fed7aa; border-top: 1px solid #fed7aa; border-bottom: 1px solid #fed7aa;">
+                <h3 style="color:#ea580c; margin-top:0;"><i class="fas fa-random"></i> دمج امتحانات (نسخ الأسئلة من عدة امتحانات)</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px;">
+                    <div>
+                        <label style="color:#ea580c;">1. ابحث واختر الامتحانات (متعدد):</label>
+                        
+                        <div class="search-container">
+                            <input type="text" id="exam-search-input" placeholder="ابحث باسم الامتحان..." onkeyup="filterMergeList()">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <span style="font-size: 12px; color: #64748b;">عدد المحدد الكلي: <span id="selected-count" style="font-weight: bold; color: #ea580c;">0</span></span>
+                            <div>
+                                <button class="btn-outline" style="font-size: 11px; padding: 2px 8px; height: auto;" onclick="selectAllVisible()">تحديد المعروض</button>
+                                <button class="btn-outline" style="font-size: 11px; padding: 2px 8px; height: auto; color:#ef4444; border-color:#fee2e2;" onclick="clearAllSelection()">إلغاء الكل</button>
+                            </div>
+                        </div>
+
+                        <div id="merge-source-list" style="height: 250px; overflow-y: auto; background: #fff; border: 1px solid #fed7aa; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                            <div style="padding:20px; text-align:center; color:#999;">جاري التحميل...</div>
+                        </div>
                     </div>
-                    <label>2. بيانات الامتحان الجديد:</label>
-                    <input id="merge-title" placeholder="عنوان الامتحان المجمع">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <select id="merge-grade">
-                            <option value="all">الجميع</option>
-                            <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
-                            <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
-                        </select>
-                         <select id="merge-category">
-                            <option value="شامل">امتحانات شاملة</option>
-                            <option value="ترم1">ترم أول</option>
-                            <option value="ترم2">ترم ثاني</option>
-                            <option value="أسبوعي">تقييمات أسبوعية</option>
-                        </select>
+
+                    <div style="background: #fff7ed; padding: 20px; border-radius: 10px; height: fit-content;">
+                        <label style="color:#ea580c;">2. بيانات الامتحان المجمع الجديد:</label>
+                        <input id="merge-title" placeholder="عنوان الامتحان المجمع الجديد...">
+                        
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                            <div>
+                                <label>الصف:</label>
+                                <select id="merge-grade">
+                                    <option value="all">الجميع</option>
+                                    <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
+                                    <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>التصنيف:</label>
+                                <select id="merge-category">
+                                    <option value="شامل">امتحانات شاملة</option>
+                                    <option value="ترم1">ترم أول</option>
+                                    <option value="ترم2">ترم ثاني</option>
+                                    <option value="أسبوعي">تقييمات أسبوعية</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-video" onclick="mergeExams()" style="margin-top: 15px; width: 100%;">
+                            <i class="fas fa-cogs"></i> دمج وإنشاء الامتحان
+                        </button>
                     </div>
-                    <button class="btn btn-video" onclick="mergeExams()">دمج وإنشاء</button>
                 </div>
             </div>
 
             <div class="admin-card">
-                <h3>قائمة الامتحانات الحالية:</h3>
-                <div id="exams-list"></div>
+                <h3><i class="fas fa-list"></i> قائمة الامتحانات الحالية</h3>
+                <div id="exams-list" style="max-height: 400px; overflow-y: auto;"></div>
             </div>
         </div>
 
@@ -216,7 +273,6 @@
                 </select>
                 <div id="exam-q-info" style="color:#16a34a; font-weight:bold; margin-bottom:15px; padding:10px; background:#dcfce7; border-radius:8px; display:inline-block;"></div>
             </div>
-            
             <div class="admin-card">
                 <h3>إضافة سؤال واحد</h3>
                 <input id="q-text" placeholder="نص السؤال">
@@ -227,7 +283,6 @@
                 </div>
                 <button class="btn btn-sec" onclick="addQuestionToExam()">حفظ السؤال</button>
             </div>
-
             <div class="admin-card" style="background:#f8fafc;">
                 <h3>🚀 الرفع المجمع (JSON)</h3>
                 <textarea id="in-bulk" rows="4" placeholder="[{&quot;q&quot;:&quot;سؤال&quot;,&quot;c&quot;:&quot;صح&quot;,&quot;w&quot;:[&quot;خطأ1&quot;,&quot;خطأ2&quot;]}]"></textarea>
@@ -270,7 +325,6 @@
                 <input id="post-title" placeholder="عنوان الخبر / المنشور">
                 <textarea id="post-body" rows="4" placeholder="تفاصيل الخبر..."></textarea>
                 <input id="post-img" placeholder="رابط صورة (اختياري)">
-                
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label>إرفاق امتحان (اختياري):</label>
@@ -287,10 +341,8 @@
                         </select>
                     </div>
                 </div>
-
                 <button class="btn btn-posts" onclick="createPost()">نشر الآن</button>
             </div>
-            
             <div class="admin-card">
                 <h4>المنشورات الحالية:</h4>
                 <div id="posts-list-manage"></div>
@@ -315,8 +367,19 @@
                 <h3>قائمة الطلاب والتقارير</h3>
                 <div class="table-container">
                     <table class="results-table">
-                        <thead> <tr> <th>اسم الطالب</th> <th>الصف</th> <th>البريد</th> <th style="min-width: 250px;">إجراءات</th> </tr> </thead>
-                        <tbody id="users-body"><tr><td colspan="4">جاري التحميل...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>الصف</th>
+                                <th>البريد</th>
+                                <th style="min-width: 250px;">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-body">
+                            <tr>
+                                <td colspan="4">جاري التحميل...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -348,7 +411,16 @@
                 </div>
                 <div class="table-container" style="margin-top:15px;">
                     <table class="results-table">
-                        <thead> <tr> <th>التاريخ</th> <th>الطالب</th> <th>الصف</th> <th>الاختبار</th> <th>الدرجة</th> <th>حذف</th> </tr> </thead>
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الطالب</th>
+                                <th>الصف</th>
+                                <th>الاختبار</th>
+                                <th>الدرجة</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
                         <tbody id="results-body"></tbody>
                     </table>
                 </div>
@@ -358,14 +430,12 @@
         <div id="tab-settings" class="admin-tab">
             <div class="admin-card">
                 <h3><i class="fas fa-sliders-h"></i> إعدادات المنصة</h3>
-                
                 <label>البيانات الأساسية:</label>
                 <div style="background:#f0f9ff; padding:15px; border-radius:10px; border:1px solid #bae6fd; margin-bottom:20px;">
                     <input type="text" id="set-title" placeholder="اسم المنصة">
                     <input type="text" id="set-logo" placeholder="رابط الشعار (Image URL)">
                     <textarea id="set-desc" rows="3" placeholder="وصف ترحيبي يظهر في الصفحة الرئيسية..."></textarea>
                 </div>
-
                 <label>تسمية الأقسام الرئيسية (تحكم كامل في الأسماء):</label>
                 <div style="background:#fdf4ff; padding:15px; border-radius:10px; border:1px solid #f0abfc; margin-bottom:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <input type="text" id="lbl-grammar" placeholder="اسم قسم النحو (الافتراضي: النحو)">
@@ -374,12 +444,10 @@
                     <input type="text" id="lbl-vid" placeholder="اسم الفيديو (الافتراضي: الفيديو)">
                     <input type="text" id="lbl-posts" placeholder="اسم المنشورات (الافتراضي: المنشورات)">
                 </div>
-                
                 <label>تطبيق الموبايل:</label>
                 <div style="background:#fff1f2; padding:15px; border-radius:10px; border:1px solid #fecdd3; margin-bottom:20px;">
                     <input type="text" id="set-app-url" placeholder="رابط تحميل التطبيق">
                 </div>
-
                 <label>روابط التواصل الاجتماعي:</label>
                 <div style="background:#f0fdf4; padding:15px; border-radius:10px; border:1px solid #bbf7d0; margin-bottom:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <input type="text" id="set-wa" placeholder="رقم واتساب">
@@ -387,16 +455,19 @@
                     <input type="text" id="set-face" placeholder="رابط فيسبوك">
                     <input type="text" id="set-tiktok" placeholder="رابط تيك توك">
                 </div>
-
                 <button class="btn btn-main" onclick="saveSiteSettings()">حفظ كافة الإعدادات</button>
             </div>
         </div>
     </div>
 
     <div id="modal-edit" class="modal">
-        <div class="modal-content"> <span onclick="document.getElementById('modal-edit').style.display='none'" class="modal-close">×</span>
-            <h3>تعديل المحتوى</h3> <input type="hidden" id="edit-id"> <input type="hidden" id="edit-col">
-            <label>تغيير الصف:</label> <select id="edit-grade"><option value="all">الكل</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select>
+        <div class="modal-content">
+            <span onclick="document.getElementById('modal-edit').style.display='none'" class="modal-close">×</span>
+            <h3>تعديل المحتوى</h3>
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-col">
+            <label>تغيير الصف:</label>
+            <select id="edit-grade"><option value="all">الكل</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select>
             <button class="btn btn-main" onclick="saveEdit()" style="margin-top:15px;">حفظ التعديلات</button>
         </div>
     </div>
@@ -439,7 +510,7 @@
         
         function showTab(id, btn) {
             document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none');
-            document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active-nav')); // لا حاجة لكلاس active-nav في CSS إلا للتمييز
+            document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active-nav'));
             document.querySelectorAll('.admin-nav button').forEach(b => b.style.borderColor = '#e2e8f0');
             document.querySelectorAll('.admin-nav button').forEach(b => b.style.color = '#64748b');
 
@@ -483,55 +554,176 @@
         }
         function deleteExam(id){ if(confirm('حذف الامتحان؟')) db.collection('exams').doc(id).delete().then(()=>{ loadExamsList(); loadExamsForMergeList(); }); }
 
+        // --- منطق دمج الامتحانات والبحث المتقدم (تم إصلاح المشكلة هنا) ---
+        let allExamsCache = []; // لتخزين جميع الامتحانات
+        let selectedExamIds = new Set(); // مخزن دائم للامتحانات المحددة (بغض النظر عن البحث)
+
         function loadExamsForMergeList() {
             const list = document.getElementById('merge-source-list');
-            list.innerHTML = 'جاري التحميل...';
+            list.innerHTML = '<div style="padding:10px;text-align:center;">جاري التحميل...</div>';
+            
             db.collection('exams').orderBy('createdAt', 'desc').get().then(snap => {
-                list.innerHTML = '';
+                allExamsCache = [];
+                // لا نقوم بتفريغ selectedExamIds هنا لنحافظ على التحديد إذا أعادنا التحميل من زر آخر، 
+                // ولكن إذا أردت تصفيره عند فتح التبويب يمكنك إلغاء التعليق عن السطر التالي:
+                selectedExamIds.clear(); 
+                
                 snap.forEach(doc => {
-                    const e = doc.data();
-                    list.innerHTML += `
-                        <div class="check-exam-box">
-                            <input type="checkbox" class="merge-check" value="${doc.id}">
-                            <span>${e.title} <small>(${gradeNames[e.grade] || e.grade})</small></span>
-                        </div>
-                    `;
+                    allExamsCache.push({ id: doc.id, ...doc.data() });
                 });
+                
+                // عرض كل الامتحانات مبدئياً
+                renderMergeList(allExamsCache);
+                updateSelectedCount();
             });
         }
 
+        // دالة لعرض القائمة بناءً على مصفوفة (مصفاة أو كاملة)
+        function renderMergeList(exams) {
+            const list = document.getElementById('merge-source-list');
+            list.innerHTML = '';
+            
+            if(exams.length === 0) {
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">لا توجد امتحانات مطابقة</div>';
+                return;
+            }
+
+            exams.forEach(e => {
+                const gradeBadge = `<small style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; display:inline-block; margin-right:5px;">${gradeNames[e.grade] || e.grade}</small>`;
+                const isChecked = selectedExamIds.has(e.id) ? 'checked' : ''; // فحص هل هو محدد مسبقاً
+
+                list.innerHTML += `
+                    <label class="check-exam-box">
+                        <input type="checkbox" class="merge-check-input" value="${e.id}" ${isChecked} onchange="toggleExamSelection('${e.id}', this)">
+                        <div style="flex:1;">
+                            <div style="font-weight:600; color:#334155;">${e.title}</div>
+                            <div style="display:flex; gap:5px; margin-top:2px;">
+                                ${gradeBadge}
+                                <small style="color:#64748b;">${e.category}</small>
+                            </div>
+                        </div>
+                    </label>
+                `;
+            });
+        }
+
+        // دالة التصفية (البحث)
+        function filterMergeList() {
+            const term = document.getElementById('exam-search-input').value.toLowerCase();
+            const filtered = allExamsCache.filter(e => 
+                e.title.toLowerCase().includes(term) || 
+                (gradeNames[e.grade] && gradeNames[e.grade].includes(term)) ||
+                e.category.includes(term)
+            );
+            renderMergeList(filtered);
+        }
+
+        // دالة التعامل مع تحديد/إلغاء تحديد امتحان (تتعامل مع الذاكرة selectedExamIds)
+        function toggleExamSelection(id, checkbox) {
+            if (checkbox.checked) {
+                selectedExamIds.add(id);
+            } else {
+                selectedExamIds.delete(id);
+            }
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selected-count').innerText = selectedExamIds.size;
+        }
+
+        // تحديد جميع العناصر **المعروضة حالياً** فقط
+        function selectAllVisible() {
+            const visibleInputs = document.querySelectorAll('.merge-check-input');
+            visibleInputs.forEach(input => {
+                if(!input.checked) {
+                    input.checked = true;
+                    selectedExamIds.add(input.value);
+                }
+            });
+            updateSelectedCount();
+        }
+
+        // إلغاء تحديد الكل (سواء المعروض أو المخفي)
+        function clearAllSelection() {
+            selectedExamIds.clear();
+            const inputs = document.querySelectorAll('.merge-check-input');
+            inputs.forEach(i => i.checked = false);
+            updateSelectedCount();
+        }
+
         async function mergeExams() {
-            const checkboxes = document.querySelectorAll('.merge-check:checked');
+            // نعتمد الآن على Set (selectedExamIds) وليس على DOM فقط
+            const idsToMerge = Array.from(selectedExamIds);
+            
             const newTitle = document.getElementById('merge-title').value;
             const newGrade = document.getElementById('merge-grade').value;
             const newCategory = document.getElementById('merge-category').value;
 
-            if (checkboxes.length === 0) return Swal.fire('تنبيه', 'اختر امتحاناً واحداً على الأقل للدمج', 'warning');
+            if (idsToMerge.length === 0) return Swal.fire('تنبيه', 'اختر امتحاناً واحداً على الأقل للدمج', 'warning');
             if (!newTitle) return Swal.fire('تنبيه', 'اكتب عنوان الامتحان الجديد', 'warning');
 
             showLoader();
             try {
-                const newExamRef = await db.collection('exams').add({ title: newTitle, grade: newGrade, subject: 'merged', category: newCategory, createdAt: new Date().toISOString() });
-                const examIds = Array.from(checkboxes).map(cb => cb.value);
-                let allQuestions = [];
-                const fetchPromises = examIds.map(eid => db.collection('questions').where('examId', '==', eid).get());
-                const snapshots = await Promise.all(fetchPromises);
-                snapshots.forEach(snap => { snap.forEach(doc => { allQuestions.push(doc.data()); }); });
-
-                if (allQuestions.length === 0) { hideLoader(); return Swal.fire('تنبيه', 'الامتحانات المختارة فارغة!', 'info'); }
-
-                const batch = db.batch();
-                let counter = 0;
-                allQuestions.forEach(qData => {
-                    const newQRef = db.collection('questions').doc();
-                    batch.set(newQRef, { q: qData.q, c: qData.c, w: qData.w, examId: newExamRef.id });
-                    counter++;
+                // 1. إنشاء الامتحان الجديد
+                const newExamRef = await db.collection('exams').add({ 
+                    title: newTitle, 
+                    grade: newGrade, 
+                    subject: 'merged', 
+                    category: newCategory, 
+                    createdAt: new Date().toISOString() 
                 });
 
-                await batch.commit();
-                hideLoader(); Swal.fire('تم بنجاح', `تم الدمج ونسخ ${counter} سؤال.`, 'success');
-                loadExamsList(); document.getElementById('merge-title').value = ''; document.querySelectorAll('.merge-check').forEach(c => c.checked = false);
-            } catch (error) { hideLoader(); Swal.fire('خطأ', error.message, 'error'); }
+                // 2. جلب الأسئلة
+                let allQuestions = [];
+                // نقسم الطلبات لتجنب الضغط أو تجاوز حدود Firebase إذا كانت القائمة كبيرة جداً
+                // (هنا نستخدم Promise.all ببساطة)
+                const fetchPromises = idsToMerge.map(eid => db.collection('questions').where('examId', '==', eid).get());
+                const snapshots = await Promise.all(fetchPromises);
+                
+                snapshots.forEach(snap => { 
+                    snap.forEach(doc => { allQuestions.push(doc.data()); }); 
+                });
+
+                if (allQuestions.length === 0) { 
+                    hideLoader(); 
+                    return Swal.fire('تنبيه', 'الامتحانات المختارة فارغة من الأسئلة!', 'info'); 
+                }
+
+                // 3. نسخ الأسئلة (Batch Write - Limit 500 per batch)
+                // التعامل مع عدد كبير من الأسئلة بتقسيمها إلى دفعات
+                const batchSize = 450; // أقل من 500 للأمان
+                const chunks = [];
+                for (let i = 0; i < allQuestions.length; i += batchSize) {
+                    chunks.push(allQuestions.slice(i, i + batchSize));
+                }
+
+                let totalCopied = 0;
+                for (const chunk of chunks) {
+                    const batch = db.batch();
+                    chunk.forEach(qData => {
+                        const newQRef = db.collection('questions').doc();
+                        batch.set(newQRef, { q: qData.q, c: qData.c, w: qData.w, examId: newExamRef.id });
+                        totalCopied++;
+                    });
+                    await batch.commit();
+                }
+
+                hideLoader(); 
+                Swal.fire('تم بنجاح', `تم الدمج ونسخ ${totalCopied} سؤال.`, 'success');
+                
+                // تنظيف بعد النجاح
+                loadExamsList(); 
+                document.getElementById('merge-title').value = ''; 
+                document.getElementById('exam-search-input').value = '';
+                selectedExamIds.clear(); // تصفير التحديدات
+                loadExamsForMergeList(); // إعادة تحميل القائمة الأصلية
+                
+            } catch (error) { 
+                hideLoader(); 
+                console.error(error);
+                Swal.fire('خطأ', 'حدث خطأ أثناء الدمج: ' + error.message, 'error'); 
+            }
         }
 
         // --- 2. الأسئلة ---
