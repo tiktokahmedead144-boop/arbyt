@@ -3,15 +3,16 @@
  <head> 
   <meta charset="UTF-8"> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>إدارة منصة لغتي هويتي - المتطورة</title> 
+  <title>إدارة منصة لغتي هويتي</title> 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&amp;display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script> 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script> 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script> 
+  
   <style>
-        /* --- التصميم الأصلي + إضافات جديدة --- */
         :root { 
             --main: #4a90e2; --sec: #2ecc71; --vocab: #9b59b6; 
             --video: #e67e22; --err: #e74c3c; --bg: #f4f7f6; 
@@ -19,354 +20,185 @@
         }
         * { box-sizing: border-box; transition: 0.3s; font-family: 'Cairo', sans-serif; }
         body { background: var(--bg); color: var(--text); margin: 0; padding: 20px; min-height: 100vh; }
-        
         .container { 
-            width: 100%; max-width: 1000px; background: var(--white); 
+            width: 100%; max-width: 950px; background: var(--white); 
             border-radius: 30px; padding: 30px; margin: 0 auto; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
         }
-        
         h2, h3 { color: var(--main); font-weight: 900; margin-top: 0; }
-        
         input, select, textarea { 
             width: 100%; padding: 12px; margin: 8px 0; 
             border: 1px solid #cbd5e1; border-radius: 12px; 
             font-size: 15px; outline: none; display: block; 
         }
         input:focus, select:focus, textarea:focus { border-color: var(--main); }
-        
         .btn { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; margin-bottom: 10px; color: white; font-size: 16px; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-main { background: var(--main); }
         .btn-sec { background: var(--sec); }
         .btn-video { background: var(--video); }
-        .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; width: auto; padding: 5px 10px; font-size: 12px; border-radius: 5px; cursor: pointer; }
-        .btn-edit { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; width: auto; padding: 5px 10px; font-size: 12px; margin-left: 5px; border-radius: 5px; cursor: pointer; }
-        .btn-report { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; width: auto; padding: 5px 10px; font-size: 12px; margin-left: 5px; border-radius: 5px; cursor: pointer; }
+        .btn-del { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; width: auto; padding: 5px 10px; font-size: 12px; }
+        .btn-edit { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; width: auto; padding: 5px 10px; font-size: 12px; margin-left: 5px; }
         .btn-outline { background: #fff; border: 2px solid #e2e8f0; color: #64748b; }
         
         .admin-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        .admin-nav button { flex: 1; min-width: 130px; font-size: 13px; margin: 0; border-radius: 20px; }
+        .admin-nav button { flex: 1; min-width: 100px; font-size: 14px; margin: 0; border-radius: 20px; }
         .admin-tab { display: none; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* شاشة الدخول */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; justify-content: center; align-items: center; }
         #login-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
         
-        /* الجداول والقوائم */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; font-size: 14px; }
         th { background: #f1f5f9; color: var(--main); white-space: nowrap; }
         
-        .check-list-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .check-list-item:hover { background: #f9f9f9; }
-        .check-list-item input { width: 20px; height: 20px; margin: 0; cursor: pointer; }
+        .btn-small-danger { 
+            background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; 
+            font-size: 11px; padding: 4px 8px; border-radius: 6px; 
+            width: auto; display: inline-block; cursor: pointer; float: left;
+        }
 
-        /* الشات */
+        /* شات الإدارة */
         .chat-list-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .chat-list-item:hover { background: #f0f9ff; }
-        .msg-box { height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; border-radius: 10px; background: #fafafa; }
-        .adm-msg { align-self: flex-end; background: var(--main); color: white; padding: 6px 12px; border-radius: 10px; max-width: 80%; }
-        .stu-msg { align-self: flex-start; background: #e2e8f0; padding: 6px 12px; border-radius: 10px; max-width: 80%; }
+        .chat-list-item:hover { background: #f8fafc; }
+        .unread-dot { width: 10px; height: 10px; background: red; border-radius: 50%; }
+        .adm-msg-box { height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .adm-msg { align-self: flex-end; background: var(--main); color: white; padding: 5px 10px; border-radius: 10px; }
+        .stu-msg { align-self: flex-start; background: #eee; padding: 5px 10px; border-radius: 10px; }
 
-        /* المودال */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 20000; justify-content: center; align-items: center; padding: 15px; }
-        .modal-content { background: white; width: 100%; max-width: 750px; border-radius: 20px; padding: 25px; position: relative; max-height: 90vh; overflow-y: auto; }
-        .modal-close { position: absolute; left: 20px; top: 20px; font-size: 25px; cursor: pointer; color: #aaa; }
-        
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px; padding: 25px; }
         #global-loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 30000; justify-content: center; align-items: center; }
         .spinner { width: 50px; height: 50px; border: 5px solid #eee; border-top-color: var(--main); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to {transform: rotate(360deg);} }
-
-        /* فلاتر الإدارة */
-        .manage-filter-bar { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
-        .manage-filter-btn { padding: 5px 15px; border-radius: 15px; border: 1px solid #eee; background: white; cursor: pointer; font-size: 13px; }
-        .manage-filter-btn.active { background: var(--main); color: white; border-color: var(--main); }
-        .btn-small-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 11px; padding: 4px 8px; border-radius: 6px; width: auto; display: inline-block; cursor: pointer; float: left; }
     </style> 
  </head> 
  <body> 
-  <div id="global-loader"> 
-   <div class="spinner"></div> 
-  </div> 
-
+  <div id="global-loader"> <div class="spinner"></div> </div> 
+  
   <div id="login-overlay"> 
    <div id="login-box"> 
     <img src="https://cdn-icons-png.flaticon.com/512/3426/3426653.png" width="80" style="margin-bottom:20px;"> 
-    <h2>دخول الإدارة</h2> 
+    <h2>تسجيل دخول الإدارة</h2> 
     <input type="email" id="adm-email" placeholder="البريد الإلكتروني"> 
     <input type="password" id="adm-pass" placeholder="كلمة المرور"> 
     <button class="btn btn-main" onclick="adminLogin()">دخول</button> 
    </div> 
   </div> 
-
+  
   <div class="container" id="admin-panel" style="display: none;"> 
    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"> 
     <h2>لوحة التحكم الشاملة ⚙️</h2> 
     <a href="index.html" target="_blank" class="btn btn-outline" style="width: auto; padding: 8px 15px;">عرض الموقع للطالب <i class="fas fa-external-link-alt"></i></a> 
    </div> 
-
+   
    <div class="admin-nav"> 
-    <button class="btn btn-main" onclick="showTab('tab-create-exam')">📁 إنشاء امتحان</button> 
-    <button class="btn btn-main" onclick="showTab('tab-q')">➕ إضافة أسئلة</button> 
-    <button class="btn btn-main" style="background:#8e44ad; border-color:#8e44ad;" onclick="showTab('tab-merge')">🔄 دمج ونسخ</button>
-    
-    <button class="btn btn-sec" onclick="showTab('tab-l')">📚 المكتبة</button> 
-    <button class="btn btn-video" onclick="showTab('tab-v')">🎬 الفيديوهات</button> 
-    
-    <button class="btn btn-outline" style="color:#e67e22; border-color:#e67e22;" onclick="showTab('tab-posts')">📢 منشورات المعلم</button>
-    <button class="btn btn-outline" onclick="showTab('tab-mng'); loadManageExams();">📝 إدارة المحتوى</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-msgs'); loadMessagesList();">📩 الرسائل</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-users'); loadStudents();">👥 الطلاب</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-rules'); loadBadgeRules();">🏅 الجوائز</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-pub'); loadPubComments();">🌍 المجتمع</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-results'); loadStudentResults();">📊 النتائج</button> 
-    <button class="btn btn-outline" onclick="showTab('tab-settings')" style="color:#4a90e2;">🛠️ الإعدادات</button> 
-    <button class="btn btn-outline" onclick="adminLogout()" style="color:red; flex:0;">خروج</button> 
+    <button class="btn btn-main" onclick="showTab('tab-q')">إضافة أسئلة</button> 
+    <button class="btn btn-sec" onclick="showTab('tab-l')">المكتبة</button> 
+    <button class="btn btn-video" onclick="showTab('tab-v')">الفيديوهات</button> 
+    <button class="btn btn-outline" onclick="showTab('tab-mng'); loadManageData('all');">إدارة المحتوى</button> 
+    <button class="btn btn-outline" onclick="showTab('tab-msgs'); loadMessagesList();" style="border-color:#9b59b6; color:#9b59b6;">📩 الرسائل</button>
+    <button class="btn btn-outline" onclick="showTab('tab-users'); loadUsers();" style="border-color:#8b5cf6; color:#8b5cf6;">👥 الطلاب والشارات</button>
+    <button class="btn btn-outline" onclick="showTab('tab-rules'); loadBadgeRules();" style="border-color:#f59e0b; color:#f59e0b;">🏅 قواعد الجوائز</button>
+    <button class="btn btn-outline" onclick="showTab('tab-pub'); loadPubComments();">🌍 المجتمع</button>
+    <button class="btn btn-outline" onclick="showTab('tab-results'); loadStudentResults();" style="border-color:var(--sec); color:var(--sec);">📊 النتائج</button> 
+    <button class="btn btn-outline" onclick="showTab('tab-settings')" style="border-color:#4a90e2; color:#4a90e2;">الإعدادات</button> 
+    <button class="btn btn-outline" onclick="adminLogout()" style="border-color:#e74c3c; color:#e74c3c; flex: 0;">خروج</button> 
    </div> 
-
-   <div id="tab-create-exam" class="admin-tab" style="display: block;"> 
-    <h3>إنشاء الامتحانات (المجلدات)</h3> 
-    <div style="background:#f0f9ff; padding:15px; border-radius:15px; border:1px solid #bae6fd;"> 
-     <input id="exam-title" placeholder="عنوان الامتحان (مثلاً: اختبار الأسبوع الأول - أكتوبر)"> 
-     <div style="display:flex; gap:10px;"> 
-         <select id="exam-grade"> <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option> <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option> </select> 
-         <select id="exam-subject"> <option value="grammar">نحو</option> <option value="vocab">مفردات</option> </select> 
-     </div> 
-     <select id="exam-category"> 
-        <option value="">-- اختر التصنيف --</option> 
-        <option value="أسبوعي">تقييمات أسبوعية</option> <option value="شامل">امتحانات شاملة</option> 
-        <option value="ترم1">ترم أول</option> <option value="ترم2">ترم ثاني</option> 
-        <option value="أكتوبر">أكتوبر</option> <option value="نوفمبر">نوفمبر</option> <option value="ديسمبر">ديسمبر</option> 
-        <option value="فبراير">فبراير</option> <option value="مارس">مارس</option> <option value="أبريل">أبريل</option> 
-     </select> 
-     <button class="btn btn-main" onclick="createExam()">حفظ الامتحان الجديد</button> 
-    </div> 
-    <h3>أحدث الامتحانات المضافة:</h3> 
-    <div id="exams-list-preview"></div> 
-   </div> 
-
-   <div id="tab-q" class="admin-tab"> 
-    <h3>إضافة أسئلة لامتحان محدد</h3> 
+   
+   <div id="tab-q" class="admin-tab" style="display: block;"> 
+    <h3>إضافة بنك أسئلة</h3> 
     <div style="background:#fff; padding:15px; border-radius:15px; border:1px solid #eee;"> 
-     <label style="color:red; font-weight:bold;">1. اختر الامتحان الذي ستضيف فيه الأسئلة:</label> 
-     <select id="target-exam-select" onchange="loadExamQuestionsCount()"> <option value="">-- جار التحميل... --</option> </select> 
-     <div id="exam-q-info" style="color:green; font-weight:bold; margin-bottom:10px;"></div> 
+        <select id="in-q-grade"> <option value="4">الرابع الابتدائي</option><option value="5">الخامس الابتدائي</option><option value="6">السادس الابتدائي</option> <option value="7">أول إعدادي</option><option value="8">ثاني إعدادي</option><option value="9">ثالث إعدادي</option> </select> 
+        <select id="in-q-type"><option value="grammar">نحو</option><option value="vocab">مفردات</option></select> 
+        <select id="in-q-month"> <option value="شامل">شامل</option> <option value="أكتوبر">أكتوبر</option><option value="نوفمبر">نوفمبر</option><option value="ديسمبر">ديسمبر</option> <option value="فبراير">فبراير</option><option value="مارس">مارس</option><option value="أبريل">أبريل</option> </select> 
     </div> 
-    <div class="bulk-area" style="margin-top:15px;"> 
-     <b>🚀 الرفع المجمع (JSON):</b> 
-     <textarea id="in-bulk" rows="3" placeholder="[{&quot;q&quot;:&quot;سؤال&quot;,&quot;c&quot;:&quot;صح&quot;,&quot;w&quot;:[&quot;خ1&quot;,&quot;خ2&quot;]}]"></textarea> 
-     <button class="btn btn-main" onclick="addBulkQuestions()">رفع القائمة</button> 
-    </div> 
+    <div class="bulk-area"> <b>🚀 الرفع المجمع (JSON):</b> <textarea id="in-bulk" rows="5" placeholder="[{&quot;q&quot;:&quot;سؤال1&quot;, &quot;c&quot;:&quot;صح&quot;, &quot;w&quot;:[&quot;خطأ1&quot;,&quot;خطأ2&quot;,&quot;خطأ3&quot;], &quot;rule&quot;:&quot;قاعدة&quot;}, ...]"></textarea> <button class="btn btn-main" onclick="saveBulk()">رفع القائمة بالكامل</button> </div> 
     <div style="margin-top:15px; border-top:1px solid #ddd; padding-top:10px;"> 
-     <b>أو إضافة سؤال واحد:</b> 
-     <input id="q-text" placeholder="نص السؤال"> 
-     <input id="q-c" placeholder="الإجابة الصحيحة"> 
-     <input id="q-w1" placeholder="إجابة خاطئة 1"> 
-     <input id="q-w2" placeholder="إجابة خاطئة 2"> 
-     <button class="btn btn-sec" onclick="addQuestionToExam()">حفظ سؤال واحد</button> 
+     <b>أو إضافة سؤال واحد:</b> <input id="in-q-txt" placeholder="نص السؤال"> <input id="in-q-c" placeholder="الإجابة الصحيحة"> <input id="in-q-w1" placeholder="إجابة خاطئة 1"> <input id="in-q-w2" placeholder="إجابة خاطئة 2"> <input id="in-q-rule" placeholder="القاعدة (اختياري)"> <button class="btn btn-sec" onclick="saveSingleQ()">حفظ سؤال واحد</button> 
     </div> 
    </div> 
-
-   <div id="tab-merge" class="admin-tab">
-       <h3>🔄 دمج ونسخ الاختبارات</h3>
-       <div style="background:#fffbe6; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #ffe58f;">
-           <p style="margin:0 0 10px;">قم باختيار صف ومادة لعرض الامتحانات، ثم حدد الامتحانات المراد دمجها لإنشاء نسخة مجمعة جديدة.</p>
-           <div style="display:flex; gap:10px;">
-               <select id="merge-grade" onchange="loadExamsForMerge()">
-                   <option value="">-- اختر الصف --</option>
-                   <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
-                   <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
-               </select>
-               <select id="merge-subject" onchange="loadExamsForMerge()">
-                   <option value="grammar">نحو</option><option value="vocab">مفردات</option>
-               </select>
-           </div>
-       </div>
-       <div id="merge-list" style="max-height:250px; overflow-y:auto; border:1px solid #eee; padding:10px; margin-bottom:15px; background:white;">
-           <p style="color:#888; text-align:center;">اختر الصف والمادة أولاً...</p>
-       </div>
-       <div style="border-top:1px solid #eee; padding-top:15px;">
-           <h4>بيانات الامتحان الجديد المجمع:</h4>
-           <input id="new-merge-title" placeholder="اسم الامتحان الجديد (مثلاً: المراجعة الشاملة - ترم أول)">
-           <select id="new-merge-category"> 
-                <option value="">-- اختر تصنيف الجديد --</option> 
-                <option value="شامل">شامل</option> <option value="ترم1">ترم أول</option> <option value="ترم2">ترم ثاني</option> 
-                <option value="أكتوبر">أكتوبر</option> <option value="أسبوعي">أسبوعي</option>
-           </select>
-           <button class="btn btn-main" style="background:#8e44ad;" onclick="executeMerge()">تنفيذ الدمج والنسخ الآن</button>
-       </div>
-   </div>
-
+   
    <div id="tab-l" class="admin-tab"> 
-    <h3>نشر درس</h3> 
-    <select id="in-l-grade">
-        <option value="all">🌍 عام لكل المراحل (يظهر للجميع)</option>
-        <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
-        <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
-    </select> 
-    <input id="in-l-tit" placeholder="عنوان الدرس"> 
-    <textarea id="in-l-bod" rows="6" placeholder="محتوى الشرح..."></textarea> 
-    <input id="in-l-img" placeholder="رابط صورة (اختياري)"> 
-    <button class="btn btn-sec" onclick="saveLesson()">نشر الدرس</button> 
+    <h3>نشر درس</h3> <select id="in-l-grade"><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select> <input id="in-l-tit" placeholder="عنوان الدرس"> <textarea id="in-l-bod" rows="6" placeholder="محتوى الشرح..."></textarea> <input id="in-l-img" placeholder="رابط صورة (اختياري)"> <button class="btn btn-sec" onclick="saveLesson()">نشر الدرس</button> 
    </div> 
-
+   
    <div id="tab-v" class="admin-tab"> 
-    <h3>نشر فيديو</h3> 
-    <select id="in-v-grade">
-        <option value="all">🌍 عام لكل المراحل (يظهر للجميع)</option>
-        <option value="4">4 ابتدائي</option><option value="5">5 ابتدائي</option><option value="6">6 ابتدائي</option>
-        <option value="7">1 إعدادي</option><option value="8">2 إعدادي</option><option value="9">3 إعدادي</option>
-    </select> 
-    <input id="v-tit" placeholder="عنوان الفيديو"> 
-    <input id="v-url" placeholder="رابط يوتيوب أو تيك توك"> 
-    <button class="btn btn-video" onclick="saveVideo()">نشر الفيديو</button> 
+    <h3>نشر فيديو</h3> <select id="in-v-grade"><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select> <input id="v-tit" placeholder="عنوان الفيديو"> <input id="v-url" placeholder="رابط يوتيوب أو تيك توك"> <button class="btn btn-video" onclick="saveVideo()">نشر الفيديو</button> 
+   </div> 
+   
+   <div id="tab-mng" class="admin-tab"> 
+    <h3>إدارة المحتوى</h3> 
+    <div class="manage-filter-bar"> <button class="manage-filter-btn active" onclick="loadManageData('all', this)">الكل</button> <button class="manage-filter-btn" onclick="loadManageData('questions', this)">الأسئلة</button> <button class="manage-filter-btn" onclick="loadManageData('lessons', this)">الدروس</button> <button class="manage-filter-btn" onclick="loadManageData('videos', this)">الفيديوهات</button> </div> 
+    <div id="mng-list" style="max-height:450px; overflow-y:auto; background:white; padding:10px; border-radius:10px; border:1px solid #ddd;"></div> 
    </div> 
 
-   <div id="tab-posts" class="admin-tab">
-       <h3>📢 منشورات المعلم (Wall)</h3>
-       <div style="background:#fff0f6; padding:15px; border-radius:15px; border:1px solid #ffdeeb;">
-           <input id="post-title" placeholder="عنوان المنشور">
-           <textarea id="post-body" rows="4" placeholder="اكتب المنشور هنا..."></textarea>
-           <input id="post-img" placeholder="رابط صورة للمنشور (اختياري)">
-           
-           <div style="margin-top:10px; padding:10px; background:white; border-radius:10px;">
-               <label style="font-weight:bold; display:block; margin-bottom:5px;">إرفاق محتوى تفاعلي (اختياري):</label>
-               <select id="post-attach-type" onchange="togglePostAttach()">
-                   <option value="none">-- بدون مرفقات --</option>
-                   <option value="exam">📎 إرفاق امتحان</option>
-                   <option value="lesson">📎 إرفاق درس من المكتبة</option>
-               </select>
-               <select id="post-attach-id" style="display:none; margin-top:5px;"></select>
+   <div id="tab-msgs" class="admin-tab">
+       <h3>الرسائل الواردة</h3>
+       <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px;">
+           <div id="msg-list" style="border:1px solid #eee; height:400px; overflow-y:auto;"></div>
+           <div id="msg-view" style="display:none; flex-direction:column;">
+               <div id="chat-header" style="padding:10px; background:#f9f9f9; font-weight:bold;"></div>
+               <div id="admin-chat-box" class="adm-msg-box"></div>
+               <input id="adm-reply-inp" placeholder="اكتب ردك...">
+               <button class="btn btn-main" onclick="sendAdminReply()">إرسال</button>
            </div>
-           
-           <button class="btn btn-main" style="background:#e67e22; margin-top:10px;" onclick="createPost()">نشر المنشور</button>
        </div>
-       <h3 style="margin-top:20px;">سجل المنشورات الحالية:</h3>
-       <div id="posts-list-manage"></div>
    </div>
 
-   <div id="tab-mng" class="admin-tab"> 
-    <h3>إدارة وتعديل المحتوى</h3> 
-    <div class="manage-filter-bar"> 
-        <button class="manage-filter-btn active" onclick="loadManageExams()">الامتحانات</button> 
-        <button class="manage-filter-btn" onclick="loadManageData('lessons', this)">الدروس</button> 
-        <button class="manage-filter-btn" onclick="loadManageData('videos', this)">الفيديوهات</button> 
-    </div> 
-    
-    <div id="mng-search-area" style="margin-bottom:10px;">
-        <input type="text" id="search-mng" placeholder="بحث بالاسم..." onkeyup="filterManageList()">
-    </div>
+   <div id="tab-users" class="admin-tab">
+       <h3>قائمة الطلاب (لمنح الجوائز اليدوية)</h3>
+       <div style="overflow-x:auto;">
+           <table class="results-table">
+               <thead> <tr> <th>اسم الطالب</th> <th>الصف</th> <th>البريد</th> <th>إجراءات</th> </tr> </thead>
+               <tbody id="users-body"><tr><td colspan="4">جاري التحميل...</td></tr></tbody>
+           </table>
+       </div>
+   </div>
 
-    <div id="mng-list" style="max-height:500px; overflow-y:auto; background:white; padding:10px; border-radius:10px; border:1px solid #ddd;"></div> 
-   </div> 
-
-   <div id="tab-msgs" class="admin-tab"> 
-    <h3>الرسائل الواردة</h3> 
-    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px;"> 
-     <div id="msg-list" style="border:1px solid #eee; height:400px; overflow-y:auto; border-radius:10px;"></div> 
-     <div id="msg-view" style="display:none; flex-direction:column;"> 
-      <div id="chat-header" style="padding:10px; background:#f9f9f9; font-weight:bold; border-bottom:1px solid #eee;"></div> 
-      <div id="admin-chat-box" class="msg-box"></div> 
-      <div style="display:flex; gap:5px;"> 
-       <input id="adm-reply-inp" placeholder="اكتب ردك..."> <button class="btn btn-main" style="width:auto;" onclick="sendReply()">إرسال</button> 
-      </div> 
-     </div> 
-    </div> 
-   </div> 
-   <div id="tab-users" class="admin-tab"> 
-    <h3>قائمة الطلاب</h3> 
-    <div style="overflow-x:auto;"> 
-     <table class="results-table"> 
-      <thead><tr><th>اسم الطالب</th><th>الصف</th><th>البريد</th><th>إجراءات</th></tr></thead> 
-      <tbody id="users-body"><tr><td colspan="4">جاري التحميل...</td></tr></tbody> 
-     </table> 
-    </div> 
-   </div> 
-   <div id="tab-rules" class="admin-tab"> 
-    <h3>قواعد الجوائز</h3> 
-    <div style="background:#fffbe6; padding:10px; margin-bottom:10px; border:1px solid #ffe58f;"> 
-     <input id="badge-title" placeholder="اسم الشارة"> <input id="badge-icon" placeholder="الأيقونة (fas fa-star)"> 
-     <select id="badge-cond"><option value="exams_count">عدد الاختبارات</option><option value="perfect_score">الدرجات النهائية</option></select> 
-     <input id="badge-thresh" type="number" placeholder="العدد"> <button class="btn btn-main" onclick="createRule()">إضافة</button> 
-    </div> 
-    <div id="rules-list"></div> 
-   </div> 
-   <div id="tab-pub" class="admin-tab"> 
-    <h3>تعليقات المجتمع</h3> <div id="adm-pub-list"></div> 
-   </div> 
+   <div id="tab-rules" class="admin-tab">
+       <h3>قواعد الجوائز التلقائية</h3>
+       <div style="background:#fffbe6; padding:10px; margin-bottom:10px;">
+           <input id="badge-title" placeholder="اسم الشارة (مثلاً: المواظب)">
+           <input id="badge-icon" placeholder="كلاس الأيقونة (fas fa-star)">
+           <select id="badge-cond"><option value="exams_count">عدد الاختبارات</option><option value="perfect_score">عدد الدرجات النهائية</option></select>
+           <input id="badge-thresh" type="number" placeholder="العدد المطلوب (مثلاً 5)">
+           <button class="btn btn-main" onclick="createRule()">إضافة قاعدة</button>
+       </div>
+       <div id="rules-list"></div>
+   </div>
+   
+   <div id="tab-pub" class="admin-tab">
+       <h3>تعليقات المجتمع</h3>
+       <div id="adm-pub-list"></div>
+   </div>
+   
    <div id="tab-results" class="admin-tab"> 
-    <h3>سجل الدرجات</h3> <button class="btn-small-danger" onclick="clearResults()">حذف الكل</button> 
-    <div style="clear:both; height:10px;"></div> 
+    <h3>سجل درجات الطلاب (الكل) 🏆</h3> 
+    <button class="btn-small-danger" onclick="clearResults()"><i class="fas fa-trash"></i> حذف كل السجلات</button> 
+    <div style="clear:both; height:10px;"></div>
     <div style="overflow-x:auto;"> 
      <table class="results-table"> 
-      <thead><tr><th>التاريخ</th><th>الطالب</th><th>الصف</th><th>الاختبار</th><th>الدرجة</th><th>حذف</th></tr></thead> 
+      <thead> <tr> <th>التاريخ</th> <th>الطالب</th> <th>الصف</th> <th>الاختبار</th> <th>الدرجة</th> <th>حذف</th> </tr> </thead> 
       <tbody id="results-body"></tbody> 
      </table> 
     </div> 
    </div> 
+   
    <div id="tab-settings" class="admin-tab"> 
-    <h3>إعدادات الموقع</h3> 
-    <div style="background:#f0f7ff; padding:15px; border-radius:15px; border:1px solid #4a90e2;"> 
-     <input type="text" id="set-title" placeholder="اسم المنصة"> 
-     <input type="text" id="set-logo" placeholder="رابط الشعار"> 
-     <textarea id="set-desc" rows="4" placeholder="وصف المنصة..."></textarea> 
-    </div> 
-    <div style="margin-top:10px;"> 
-     <input type="text" id="set-wa" placeholder="واتساب"> <input type="text" id="set-tele" placeholder="تليجرام"> 
-     <input type="text" id="set-face" placeholder="فيسبوك"> <input type="text" id="set-tiktok" placeholder="تيك توك"> 
-    </div> <button class="btn btn-main" onclick="saveSiteSettings()">حفظ الإعدادات</button> 
+    <h3>إعدادات الموقع العامة 🛠️</h3> 
+    <div style="background:#f0f7ff; padding:15px; border-radius:15px; border:1px solid #4a90e2; margin-bottom:15px;"> <b>📝 البيانات الأساسية:</b> <input type="text" id="set-title" placeholder="اسم المنصة"> <input type="text" id="set-subtitle" placeholder="وصف قصير"> <input type="text" id="set-logo" placeholder="رابط الشعار"> <input type="text" id="set-welcome-msg" placeholder="رسالة الترحيب"> </div> 
+    <div style="background:#f0fdf4; padding:15px; border-radius:15px; border:1px solid #2ecc71; margin-bottom:15px;"> <b>🔗 روابط التواصل:</b> <input type="text" id="set-wa" placeholder="واتساب"> <input type="text" id="set-tele" placeholder="تليجرام"> <input type="text" id="set-face" placeholder="فيسبوك"> <input type="text" id="set-tiktok" placeholder="تيك توك"> </div> 
+    <div style="background:#fff7ed; padding:15px; border-radius:15px; border:1px solid #e67e22;"> <b>📲 التحديثات:</b> <input type="text" id="admin-app-url" placeholder="رابط التطبيق الجديد"> <label style="display:block; margin:10px 0;"><input type="checkbox" id="admin-show-banner" style="width:auto; display:inline;"> تفعيل شريط التحديث</label> <input type="text" id="admin-update-msg" placeholder="نص رسالة التحديث"> </div> <button class="btn btn-main" onclick="saveSiteSettings()">حفظ كل الإعدادات</button> 
    </div> 
   </div> 
-
+  
   <div id="modal-edit" class="modal"> 
-   <div class="modal-content"> <span onclick="document.getElementById('modal-edit').style.display='none'" class="modal-close">×</span> 
-    <h3>تعديل المحتوى</h3> 
-    <input type="hidden" id="edit-id"> <input type="hidden" id="edit-col"> 
-    <label>الصف:</label> 
-    <select id="edit-grade">
-        <option value="all">عام للجميع</option>
-        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-    </select> 
-    <button class="btn btn-main" onclick="saveEdit()" style="margin-top:15px;">حفظ التعديلات</button> 
+   <div class="modal-content"> <span onclick="document.getElementById('modal-edit').style.display='none'" style="float:left; cursor:pointer; font-size:30px;">×</span> 
+    <h3>تعديل ونقل المحتوى</h3> <input type="hidden" id="edit-id"> <input type="hidden" id="edit-col"> <label>الصف:</label> <select id="edit-grade"><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option></select> <label>الشهر (للأسئلة):</label> <select id="edit-month"><option value="شامل">شامل</option><option value="أكتوبر">أكتوبر</option><option value="نوفمبر">نوفمبر</option><option value="ديسمبر">ديسمبر</option><option value="فبراير">فبراير</option><option value="مارس">مارس</option><option value="أبريل">أبريل</option></select> <label>النوع:</label> <select id="edit-type"><option value="grammar">نحو</option><option value="vocab">مفردات</option></select> <button class="btn btn-main" onclick="saveEdit()" style="margin-top:15px;">حفظ التعديلات</button> 
    </div> 
   </div> 
-
-  <div id="modal-deep-edit" class="modal">
-      <div class="modal-content">
-          <span class="modal-close" onclick="document.getElementById('modal-deep-edit').style.display='none'">×</span>
-          <h3>تعديل بيانات الامتحان والأسئلة</h3>
-          <input type="hidden" id="deep-edit-id">
-          
-          <div style="background:#f9f9f9; padding:10px; border-radius:10px; margin-bottom:15px; border:1px solid #eee;">
-              <h4 style="margin-top:0;">البيانات الأساسية:</h4>
-              <label>عنوان الامتحان:</label> <input id="deep-tit">
-              <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>الصف:</label> 
-                    <select id="deep-grade">
-                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                    </select>
-                </div>
-                <div style="flex:1;"><label>التصنيف:</label> 
-                    <select id="deep-cat"> 
-                        <option value="أسبوعي">أسبوعي</option> <option value="شامل">شامل</option> 
-                        <option value="ترم1">ترم أول</option> <option value="ترم2">ترم ثاني</option> 
-                        <option value="أكتوبر">أكتوبر</option> <option value="نوفمبر">نوفمبر</option> <option value="ديسمبر">ديسمبر</option> 
-                    </select>
-                </div>
-              </div>
-              <button class="btn btn-main" onclick="saveDeepExamInfo()">حفظ بيانات الامتحان فقط</button>
-          </div>
-
-          <div style="border-top:2px solid #eee; padding-top:10px;">
-              <h4>إدارة الأسئلة (<span id="deep-q-count">0</span>):</h4>
-              <div id="deep-q-list" style="max-height:300px; overflow-y:auto;"></div>
-          </div>
-      </div>
-  </div>
-
+  
   <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCgpj7MLByWpTVUE2Tg3DQ0pwsUjLhAyEM",
@@ -380,358 +212,34 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-        const gradeNames = { "4": "رابع", "5": "خامس", "6": "سادس", "7": "أول ع", "8": "ثاني ع", "9": "ثالث ع" };
+        const gradeNames = { "4": "رابع ابتدائي", "5": "خامس ابتدائي", "6": "سادس ابتدائي", "7": "أول إعدادي", "8": "ثاني إعدادي", "9": "ثالث إعدادي" };
+        let selectedChatUid = null;
 
         function showLoader() { document.getElementById('global-loader').style.display = 'flex'; }
         function hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
 
-        // Auth Logic
         auth.onAuthStateChanged((user) => {
             if (user) { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('admin-panel').style.display = 'block'; loadSettings(); } 
             else { document.getElementById('login-overlay').style.display = 'flex'; document.getElementById('admin-panel').style.display = 'none'; }
         });
+
         function adminLogin() {
             const email = document.getElementById('adm-email').value; const pass = document.getElementById('adm-pass').value;
-            showLoader(); auth.signInWithEmailAndPassword(email, pass).then(() => { Swal.fire('تم الدخول','','success'); }).catch((e) => { Swal.fire('خطأ','بيانات خاطئة','error'); }).finally(() => hideLoader());
+            showLoader(); auth.signInWithEmailAndPassword(email, pass).then(() => { Swal.fire({icon:'success', title:'تم الدخول', timer:1500, showConfirmButton:false}); }).catch((e) => { Swal.fire({icon:'error', title:'خطأ', text:'تأكد من البيانات'}); }).finally(() => hideLoader());
         }
         function adminLogout() { auth.signOut().then(() => location.reload()); }
-        
-        // Tab Switching & Initialization
-        function showTab(id) { 
-            document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none'); 
-            document.getElementById(id).style.display = 'block'; 
-            if(id === 'tab-q') loadExamsToSelect('target-exam-select');
-            if(id === 'tab-create-exam') loadExamsList();
-            if(id === 'tab-posts') { loadManagePosts(); loadExamsToSelect('post-attach-id'); }
-        }
+        function showTab(id) { document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
 
-        // --- 1. Exams ---
-        function createExam(){
-            const title = document.getElementById('exam-title').value;
-            const grade = document.getElementById('exam-grade').value;
-            const subject = document.getElementById('exam-subject').value;
-            const category = document.getElementById('exam-category').value;
-            if(!title || !category) return Swal.fire('خطأ','أكمل البيانات','error');
-            
-            db.collection('exams').add({ title, grade, subject, category, createdAt: new Date().toISOString() })
-              .then(()=>{ Swal.fire('تم','','success'); loadExamsList(); });
-        }
-        function loadExamsList(){
-            db.collection('exams').orderBy('createdAt','desc').limit(5).get().then(snap=>{
-                const div = document.getElementById('exams-list-preview'); div.innerHTML='';
-                snap.forEach(doc=>{ div.innerHTML += `<div>- ${doc.data().title}</div>`; });
-            });
-        }
-
-        // --- 2. Questions ---
-        function loadExamsToSelect(elementId){
-            const sel = document.getElementById(elementId);
-            sel.innerHTML = '<option>جاري التحميل...</option>';
-            db.collection('exams').orderBy('createdAt','desc').get().then(snap=>{
-                sel.innerHTML = '<option value="">-- اختر الامتحان --</option>';
-                snap.forEach(doc=>{
-                    const e = doc.data();
-                    const opt = document.createElement('option');
-                    opt.value = doc.id;
-                    opt.innerText = `${e.title} (${e.grade} - ${e.category})`;
-                    sel.appendChild(opt);
-                });
-            });
-        }
-        function loadExamQuestionsCount(){
-            const id = document.getElementById('target-exam-select').value;
-            if(!id) return;
-            db.collection('questions').where('examId','==',id).get().then(snap=>{
-                document.getElementById('exam-q-info').innerText = `عدد الأسئلة: ${snap.size}`;
-            });
-        }
-        function addQuestionToExam(){
-            const examId = document.getElementById('target-exam-select').value;
-            if(!examId) return Swal.fire('تنبيه','اختر الامتحان','warning');
-            db.collection('questions').add({
-                examId: examId, q: document.getElementById('q-text').value, c: document.getElementById('q-c').value,
-                w: [document.getElementById('q-w1').value, document.getElementById('q-w2').value, "خطأ"]
-            }).then(()=>{ Swal.fire('تم','','success'); document.getElementById('q-text').value=''; loadExamQuestionsCount(); });
-        }
-        function addBulkQuestions(){
-            const examId = document.getElementById('target-exam-select').value;
-            if(!examId) return Swal.fire('تنبيه','اختر الامتحان','warning');
-            try {
-                const data = JSON.parse(document.getElementById('in-bulk').value);
-                const batch = db.batch();
-                data.forEach(item => { const ref = db.collection('questions').doc(); batch.set(ref, { ...item, examId: examId }); });
-                batch.commit().then(()=>{ Swal.fire('تم الرفع','','success'); loadExamQuestionsCount(); });
-            } catch(e) { Swal.fire('خطأ JSON','','error'); }
-        }
-
-        // --- 3. MERGE & CLONE (NEW FEATURE) ---
-        function loadExamsForMerge() {
-            const grade = document.getElementById('merge-grade').value;
-            const subject = document.getElementById('merge-subject').value;
-            const list = document.getElementById('merge-list');
-            if(!grade || !subject) return;
-            
-            list.innerHTML = '<div class="spinner"></div>';
-            db.collection('exams').where('grade', '==', grade).where('subject', '==', subject).get().then(snap => {
-                list.innerHTML = '';
-                if(snap.empty) { list.innerHTML = '<p style="text-align:center">لا توجد اختبارات</p>'; return; }
-                snap.forEach(doc => {
-                    const e = doc.data();
-                    list.innerHTML += `
-                    <div class="check-list-item">
-                        <input type="checkbox" class="merge-chk" value="${doc.id}">
-                        <span><b>${e.title}</b> <small style="color:#888;">(${e.category})</small></span>
-                    </div>`;
-                });
-            });
-        }
-        async function executeMerge() {
-            const checks = document.querySelectorAll('.merge-chk:checked');
-            const newTitle = document.getElementById('new-merge-title').value;
-            const newCat = document.getElementById('new-merge-category').value;
-            const grade = document.getElementById('merge-grade').value;
-            const subject = document.getElementById('merge-subject').value;
-
-            if(checks.length === 0 || !newTitle || !newCat) return Swal.fire('تنبيه', 'اختر اختبارات وضع عنواناً وتصنيفاً جديداً', 'warning');
-
-            showLoader();
-            try {
-                // 1. Create New Exam
-                const newExamRef = await db.collection('exams').add({
-                    title: newTitle, grade, subject, category: newCat, createdAt: new Date().toISOString(), isMerged: true
-                });
-
-                // 2. Clone Questions
-                const batch = db.batch();
-                let count = 0;
-                
-                for (const chk of checks) {
-                    const qSnap = await db.collection('questions').where('examId', '==', chk.value).get();
-                    qSnap.forEach(qDoc => {
-                        const qData = qDoc.data();
-                        const newQRef = db.collection('questions').doc();
-                        batch.set(newQRef, { ...qData, examId: newExamRef.id });
-                        count++;
-                    });
-                }
-                
-                await batch.commit();
-                hideLoader();
-                Swal.fire('نجاح', `تم إنشاء "${newTitle}" ونسخ ${count} سؤال إليه بنجاح.`, 'success');
-                document.getElementById('new-merge-title').value = '';
-                checks.forEach(c => c.checked = false);
-            } catch(e) {
-                hideLoader();
-                console.error(e);
-                Swal.fire('خطأ', 'حدث خطأ أثناء العملية', 'error');
-            }
-        }
-
-        // --- 4 & 5. Lessons & Videos (Updated for Global Content) ---
-        function saveLesson() { 
-            db.collection("lessons").add({ 
-                grade: document.getElementById('in-l-grade').value, 
-                title: document.getElementById('in-l-tit').value, 
-                body: document.getElementById('in-l-bod').value, 
-                img: document.getElementById('in-l-img').value 
-            }).then(() => Swal.fire('تم النشر', '', 'success')); 
-        }
-        function saveVideo() { 
-            db.collection("videos").add({ 
-                grade: document.getElementById('in-v-grade').value, 
-                title: document.getElementById('v-tit').value, 
-                url: document.getElementById('v-url').value 
-            }).then(() => Swal.fire('تم النشر', '', 'success')); 
-        }
-
-        // --- 6. TEACHER POSTS (NEW FEATURE) ---
-        function togglePostAttach(){
-            const type = document.getElementById('post-attach-type').value;
-            const sel = document.getElementById('post-attach-id');
-            sel.style.display = type === 'none' ? 'none' : 'block';
-            sel.innerHTML = '<option>جاري التحميل...</option>';
-            
-            if(type === 'exam') {
-                loadExamsToSelect('post-attach-id');
-            } else if (type === 'lesson') {
-                db.collection('lessons').orderBy('title').get().then(snap => {
-                    sel.innerHTML = '<option value="">-- اختر الدرس --</option>';
-                    snap.forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d.id; opt.innerText = d.data().title;
-                        sel.appendChild(opt);
-                    });
-                });
-            }
-        }
-        function createPost() {
-            const title = document.getElementById('post-title').value;
-            const body = document.getElementById('post-body').value;
-            const img = document.getElementById('post-img').value;
-            const attType = document.getElementById('post-attach-type').value;
-            const attId = document.getElementById('post-attach-id').value;
-
-            if(!title) return Swal.fire('تنبيه', 'يجب وضع عنوان للمنشور', 'warning');
-
-            db.collection('posts').add({
-                title, body, img,
-                attachType: attType, attachId: attId,
-                date: new Date().toISOString()
-            }).then(() => {
-                Swal.fire('تم', 'تم نشر المنشور', 'success');
-                document.getElementById('post-title').value = '';
-                document.getElementById('post-body').value = '';
-                loadManagePosts();
-            });
-        }
-        function loadManagePosts() {
-            const div = document.getElementById('posts-list-manage');
-            div.innerHTML = 'جاري التحميل...';
-            db.collection('posts').orderBy('date', 'desc').get().then(snap => {
-                div.innerHTML = '';
-                if(snap.empty) div.innerHTML = '<p>لا توجد منشورات</p>';
-                snap.forEach(doc => {
-                    const p = doc.data();
-                    div.innerHTML += `<div style="padding:10px; border:1px solid #eee; margin-bottom:5px; border-radius:10px; background:#fff; display:flex; justify-content:space-between;">
-                        <div><b>${p.title}</b> <small>${new Date(p.date).toLocaleDateString()}</small></div>
-                        <button class="btn-del" onclick="db.collection('posts').doc('${doc.id}').delete().then(()=>loadManagePosts())">حذف</button>
-                    </div>`;
-                });
-            });
-        }
-
-        // --- 7. Manage Content (Updated: Filter & Deep Edit) ---
-        let manageCache = [];
-        function loadManageExams() {
-            const list = document.getElementById('mng-list');
-            list.innerHTML = '<div class="spinner"></div>';
-            db.collection('exams').orderBy('createdAt', 'desc').get().then(snap => {
-                manageCache = [];
-                snap.forEach(d => manageCache.push({id: d.id, ...d.data(), type: 'exam'}));
-                renderManageList(manageCache);
-            });
-        }
-        function loadManageData(coll, btn) {
-            if(btn) { document.querySelectorAll('.manage-filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-            const list = document.getElementById('mng-list');
-            list.innerHTML = '<div class="spinner"></div>';
-            db.collection(coll).get().then(snap => {
-                manageCache = [];
-                snap.forEach(d => manageCache.push({id: d.id, ...d.data(), type: coll}));
-                renderManageList(manageCache);
-            });
-        }
-        function renderManageList(items) {
-            const list = document.getElementById('mng-list');
-            if(items.length === 0) { list.innerHTML = '<p style="text-align:center">لا يوجد محتوى</p>'; return; }
-            list.innerHTML = items.map(i => {
-                if(i.type === 'exam') {
-                    return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;">
-                        <div><b>${i.title}</b> <span style="font-size:12px; color:#888;">(${i.grade} - ${i.category})</span></div>
-                        <div>
-                            <button class="btn-edit" onclick="openDeepEdit('${i.id}')">تعديل شامل</button>
-                            <button class="btn-del" onclick="deleteExamFinal('${i.id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                } else {
-                    return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;">
-                        <div><b>${i.title}</b> <span style="font-size:12px; color:#888;">(${i.grade === 'all' ? 'عام' : i.grade})</span></div>
-                        <div>
-                            <button class="btn-edit" onclick="openSimpleEdit('${i.id}', '${i.type}s', '${i.grade}')"><i class="fas fa-pen"></i></button>
-                            <button class="btn-del" onclick="delDoc('${i.type}s', '${i.id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>`;
-                }
-            }).join('');
-        }
-        function filterManageList() {
-            const term = document.getElementById('search-mng').value.toLowerCase();
-            const filtered = manageCache.filter(i => i.title.toLowerCase().includes(term));
-            renderManageList(filtered);
-        }
-        function delDoc(c, id) { if(confirm("حذف؟")) db.collection(c).doc(id).delete().then(() => loadManageData(c)); }
-        function deleteExamFinal(id) {
-            if(!confirm('سيتم حذف الامتحان وكل أسئلته نهائياً! هل أنت متأكد؟')) return;
-            db.collection('questions').where('examId','==',id).get().then(snap => {
-                const batch = db.batch();
-                snap.forEach(d => batch.delete(d.ref));
-                batch.delete(db.collection('exams').doc(id));
-                batch.commit().then(() => { Swal.fire('تم الحذف'); loadManageExams(); });
-            });
-        }
-        
-        // Simple Edit (Lessons/Videos)
-        function openSimpleEdit(id, c, g) { 
-            document.getElementById('edit-id').value = id; document.getElementById('edit-col').value = c; 
-            document.getElementById('edit-grade').value = g; document.getElementById('modal-edit').style.display = 'flex'; 
-        }
-        function saveEdit() { 
-            const id = document.getElementById('edit-id').value; const col = document.getElementById('edit-col').value; 
-            db.collection(col).doc(id).update({ grade: document.getElementById('edit-grade').value })
-              .then(() => { document.getElementById('modal-edit').style.display = 'none'; Swal.fire('تم'); loadManageData(col); }); 
-        }
-
-        // Deep Edit (Exams - NEW FEATURE)
-        let currentEditingExamId = null;
-        function openDeepEdit(id) {
-            currentEditingExamId = id;
-            showLoader();
-            const exam = manageCache.find(e => e.id === id);
-            
-            document.getElementById('deep-edit-id').value = id;
-            document.getElementById('deep-tit').value = exam.title;
-            document.getElementById('deep-grade').value = exam.grade;
-            document.getElementById('deep-cat').value = exam.category;
-            
-            db.collection('questions').where('examId', '==', id).get().then(snap => {
-                const list = document.getElementById('deep-q-list');
-                document.getElementById('deep-q-count').innerText = snap.size;
-                list.innerHTML = '';
-                snap.forEach(qDoc => {
-                    const q = qDoc.data();
-                    list.innerHTML += `
-                    <div style="background:#fff; border:1px solid #ddd; padding:10px; margin-bottom:5px; border-radius:5px;">
-                        <input id="q-txt-${qDoc.id}" value="${q.q}" style="margin-bottom:5px;">
-                        <div style="display:flex; gap:5px;">
-                            <button class="btn-edit" onclick="updateQuestionText('${qDoc.id}')">حفظ تعديل السؤال</button>
-                            <button class="btn-del" onclick="deleteQuestionOne('${qDoc.id}')">حذف السؤال</button>
-                        </div>
-                    </div>`;
-                });
-                document.getElementById('modal-deep-edit').style.display = 'flex';
-                hideLoader();
-            });
-        }
-        function saveDeepExamInfo() {
-            const id = document.getElementById('deep-edit-id').value;
-            db.collection('exams').doc(id).update({
-                title: document.getElementById('deep-tit').value,
-                grade: document.getElementById('deep-grade').value,
-                category: document.getElementById('deep-cat').value
-            }).then(() => { Swal.fire('تم تحديث البيانات الأساسية'); loadManageExams(); });
-        }
-        function updateQuestionText(qid) {
-            const val = document.getElementById(`q-txt-${qid}`).value;
-            db.collection('questions').doc(qid).update({ q: val }).then(() => Swal.fire({toast:true, icon:'success', title:'تم الحفظ', showConfirmButton:false, timer:1000}));
-        }
-        function deleteQuestionOne(qid) {
-            if(confirm('حذف هذا السؤال؟')) {
-                db.collection('questions').doc(qid).delete().then(() => {
-                    document.getElementById(`q-txt-${qid}`).parentElement.remove();
-                    let count = Number(document.getElementById('deep-q-count').innerText);
-                    document.getElementById('deep-q-count').innerText = count - 1;
-                });
-            }
-        }
-
-        // --- Other Features (Messages, Users, etc. - UNTOUCHED) ---
+        // --- MESSAGES ---
         function loadMessagesList(){
-            db.collection('messages').orderBy('lastTime','desc').limit(20).onSnapshot(snap=>{
-                const l = document.getElementById('msg-list'); l.innerHTML = '';
-                snap.forEach(doc=>{ const d = doc.data(); l.innerHTML += `<div class="chat-list-item" onclick="openChat('${doc.id}','${d.studentName}')" style="background:${d.unread?'#f0f9ff':'white'}"><div><b>${d.studentName}</b></div>${d.unread?'<span style="color:red">●</span>':''}</div>`; });
+            db.collection('messages').orderBy('lastTime','desc').onSnapshot(snap=>{
+                const list = document.getElementById('msg-list'); list.innerHTML = '';
+                snap.forEach(doc=>{
+                    const d = doc.data();
+                    list.innerHTML += `<div class="chat-list-item" onclick="openChat('${doc.id}','${d.studentName}')" style="background:${d.unread?'#f0f9ff':'white'}"><div><b>${d.studentName}</b><br><small>${d.lastMessage}</small></div>${d.unread?'<div class="unread-dot"></div>':''}</div>`;
+                });
             });
         }
-        let selectedChatUid = null;
         function openChat(uid, name){
             selectedChatUid = uid; document.getElementById('msg-view').style.display='flex'; document.getElementById('chat-header').innerText = name;
             db.collection('messages').doc(uid).update({unread:false});
@@ -741,38 +249,72 @@
                 box.scrollTop=box.scrollHeight;
             });
         }
-        function sendReply(){ const t=document.getElementById('adm-reply-inp').value; if(t && selectedChatUid) { db.collection('messages').doc(selectedChatUid).collection('chat').add({text:t, sender:'admin', timestamp:new Date().toISOString()}); document.getElementById('adm-reply-inp').value=''; } }
-        
-        function loadStudents(){
-            const tb = document.getElementById('users-body'); tb.innerHTML = '<tr><td colspan="4">جاري التحميل...</td></tr>';
-            db.collection('users').limit(50).get().then(snap=>{
-                tb.innerHTML = '';
-                snap.forEach(d=>{ const u = d.data(); tb.innerHTML += `<tr><td>${u.name}</td><td>${u.grade}</td><td>${u.email}</td><td><button class="btn-del" onclick="if(confirm('حذف؟')) db.collection('users').doc('${d.id}').delete().then(()=>loadStudents())">حذف</button></td></tr>`; });
+        function sendAdminReply(){
+            const t=document.getElementById('adm-reply-inp').value; if(!t || !selectedChatUid) return;
+            db.collection('messages').doc(selectedChatUid).collection('chat').add({ text:t, sender:'admin', timestamp:new Date().toISOString() });
+            document.getElementById('adm-reply-inp').value='';
+        }
+
+        // --- STUDENTS & BADGES ---
+        function loadUsers(){
+            const tb = document.getElementById('users-body'); tb.innerHTML='';
+            db.collection('users').get().then(snap=>{
+                snap.forEach(d=>{
+                    const u=d.data();
+                    tb.innerHTML += `<tr><td>${u.name}</td><td>${gradeNames[u.grade]||u.grade}</td><td>${u.email}</td><td><button class="btn btn-sec" onclick="grantBadge('${d.id}')">منح وسام</button></td></tr>`;
+                });
             });
         }
-        
+        async function grantBadge(uid){
+            const {value:t} = await Swal.fire({input:'text', inputLabel:'اسم الوسام'});
+            if(t) db.collection('user_badges').add({ uid, title:t, icon:'fas fa-medal', color:'gold', timestamp:new Date().toISOString() }).then(()=>Swal.fire('تم'));
+        }
+
+        // --- RULES ---
         function createRule(){
-            const t=document.getElementById('badge-title').value; const i=document.getElementById('badge-icon').value; const c=document.getElementById('badge-cond').value; const th=Number(document.getElementById('badge-thresh').value);
+            const t=document.getElementById('badge-title').value, i=document.getElementById('badge-icon').value, c=document.getElementById('badge-cond').value, th=Number(document.getElementById('badge-thresh').value);
             db.collection('badges_rules').add({title:t, icon:i, condition:c, threshold:th, type:'auto', color:'gold'}).then(()=>{ Swal.fire('تم'); loadBadgeRules(); });
         }
         function loadBadgeRules(){
             const l=document.getElementById('rules-list'); l.innerHTML='';
-            db.collection('badges_rules').get().then(s=>{ s.forEach(d=>{ l.innerHTML+=`<div>${d.data().title} <button class="btn-del" onclick="db.collection('badges_rules').doc('${d.id}').delete().then(()=>loadBadgeRules())">x</button></div>`; }); });
+            db.collection('badges_rules').get().then(s=>{ s.forEach(d=>{ const r=d.data(); l.innerHTML+=`<div>${r.title} (${r.condition} >= ${r.threshold}) <button style="color:red" onclick="db.collection('badges_rules').doc('${d.id}').delete().then(()=>loadBadgeRules())">x</button></div>`; }); });
         }
-        
+
+        // --- PUBLIC COMMENTS ---
         function loadPubComments(){
-            db.collection('public_comments').orderBy('time','desc').limit(20).onSnapshot(s=>{
+            db.collection('public_comments').orderBy('time','desc').onSnapshot(s=>{
                 document.getElementById('adm-pub-list').innerHTML = s.docs.map(d=>{
-                    return `<div style="border:1px solid #eee; padding:10px; margin-bottom:5px;"><b>${d.data().name}</b>: ${d.data().text} <div style="margin-top:5px;"><input id="rep-${d.id}" placeholder="رد..." style="width:60%; display:inline-block;"><button onclick="db.collection('public_comments').doc('${d.id}').update({reply:document.getElementById('rep-${d.id}').value})" class="btn-sec">رد</button> <button class="btn-del" onclick="db.collection('public_comments').doc('${d.id}').delete()">حذف</button></div></div>`;
+                    const c = d.data();
+                    return `<div style="border:1px solid #eee; padding:10px; margin-bottom:5px;"><b>${c.name}</b>: ${c.text} <div><input id="rep-${d.id}" placeholder="رد"><button onclick="db.collection('public_comments').doc('${d.id}').update({reply:document.getElementById('rep-${d.id}').value})">رد</button><button style="color:red" onclick="db.collection('public_comments').doc('${d.id}').delete()">حذف</button></div></div>`;
                 }).join('');
             });
         }
-        
-        function loadStudentResults() { const tbody = document.getElementById('results-body'); tbody.innerHTML = '<tr><td colspan="6">جاري التحميل...</td></tr>'; db.collection("results").orderBy('date','desc').limit(50).get().then(snap => { const docs = snap.docs.map(d=>({id:d.id,...d.data()})); tbody.innerHTML = docs.map(r => `<tr><td>${new Date(r.date).toLocaleDateString()}</td><td>${r.name}</td><td>${r.grade}</td><td>${r.examType}</td><td>${r.score}/${r.total}</td><td><button class="btn-small-danger" onclick="db.collection('results').doc('${r.id}').delete().then(()=>loadStudentResults())">حذف</button></td></tr>`).join(''); }); }
-        function clearResults() { if(confirm("مسح الكل؟")) { db.collection("results").get().then(snap => { const batch = db.batch(); snap.forEach(d => batch.delete(d.ref)); batch.commit().then(() => loadStudentResults()); }); } }
-        
-        function loadSettings() { db.collection("settings").doc("site_info").get().then(s => { if(s.exists) { const d = s.data(); document.getElementById('set-title').value = d.title||""; document.getElementById('set-logo').value = d.logo||""; document.getElementById('set-desc').value = d.description||""; document.getElementById('set-wa').value = d.wa||""; document.getElementById('set-tele').value = d.tele||""; document.getElementById('set-face').value = d.face||""; document.getElementById('set-tiktok').value = d.tiktok||""; } }); }
-        function saveSiteSettings() { db.collection("settings").doc("site_info").set({ title: document.getElementById('set-title').value, logo: document.getElementById('set-logo').value, description: document.getElementById('set-desc').value, wa: document.getElementById('set-wa').value, tele: document.getElementById('set-tele').value, face: document.getElementById('set-face').value, tiktok: document.getElementById('set-tiktok').value }, {merge: true}).then(() => Swal.fire('تم الحفظ', '', 'success')); }
-  </script> 
+
+        // --- CONTENT ---
+        function saveSingleQ() { db.collection("questions").add({ grade: document.getElementById('in-q-grade').value, type: document.getElementById('in-q-type').value, month: document.getElementById('in-q-month').value, q: document.getElementById('in-q-txt').value, c: document.getElementById('in-q-c').value, w: [document.getElementById('in-q-w1').value, document.getElementById('in-q-w2').value, "إجابة خاطئة"], rule: document.getElementById('in-q-rule').value }).then(() => { Swal.fire('تم الحفظ', '', 'success'); document.getElementById('in-q-txt').value = ''; }).catch(e => alert("خطأ")); }
+        function saveBulk() { try { const data = JSON.parse(document.getElementById('in-bulk').value); const grade = document.getElementById('in-q-grade').value; const type = document.getElementById('in-q-type').value; const month = document.getElementById('in-q-month').value; const batch = db.batch(); data.forEach(q => { const ref = db.collection("questions").doc(); batch.set(ref, { ...q, grade, type, month }); }); batch.commit().then(() => Swal.fire('تم الرفع!', '', 'success')); } catch(e) { Swal.fire('خطأ JSON', '', 'error'); } }
+        function saveLesson() { db.collection("lessons").add({ grade: document.getElementById('in-l-grade').value, title: document.getElementById('in-l-tit').value, body: document.getElementById('in-l-bod').value, img: document.getElementById('in-l-img').value }).then(() => Swal.fire('تم النشر', '', 'success')).catch(e => alert("خطأ")); }
+        function saveVideo() { db.collection("videos").add({ grade: document.getElementById('in-v-grade').value, title: document.getElementById('v-tit').value, url: document.getElementById('v-url').value }).then(() => Swal.fire('تم النشر', '', 'success')).catch(e => alert("خطأ")); }
+
+        function loadManageData(type, btn) {
+            if(btn) { document.querySelectorAll('.manage-filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+            const list = document.getElementById('mng-list'); list.innerHTML = '<p style="text-align:center;">جاري الجلب...</p>';
+            let items = []; const promises = [];
+            if(type === 'all' || type === 'questions') promises.push(db.collection("questions").get().then(s => s.forEach(d => items.push({id: d.id, ...d.data(), col:'questions', lbl:'سؤال'}))));
+            if(type === 'all' || type === 'lessons') promises.push(db.collection("lessons").get().then(s => s.forEach(d => items.push({id: d.id, ...d.data(), col:'lessons', lbl:'درس'}))));
+            if(type === 'all' || type === 'videos') promises.push(db.collection("videos").get().then(s => s.forEach(d => items.push({id: d.id, ...d.data(), col:'videos', lbl:'فيديو'}))));
+            Promise.all(promises).then(() => { list.innerHTML = items.length ? items.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; margin-bottom:5px;"><div><b>${(i.q || i.title || "").substring(0,40)}</b> <span style="font-size:12px; color:#888;">(${i.lbl} - ${gradeNames[i.grade] || i.grade})</span></div><div><button class="btn-edit" onclick="openEditModal('${i.id}','${i.col}','${i.grade}','${i.month||''}','${i.type||''}')"><i class="fas fa-pen"></i></button><button class="btn-del" onclick="delDoc('${i.col}','${i.id}')"><i class="fas fa-trash"></i></button></div></div>`).join('') : '<p style="text-align:center">لا يوجد محتوى</p>'; });
+        }
+        function delDoc(c, id) { if(confirm("تأكيد الحذف؟")) { db.collection(c).doc(id).delete().then(() => loadManageData('all')); } }
+        function openEditModal(id, c, g, m, t) { document.getElementById('edit-id').value = id; document.getElementById('edit-col').value = c; document.getElementById('edit-grade').value = g; if(m) document.getElementById('edit-month').value = m; if(t) document.getElementById('edit-type').value = t; document.getElementById('modal-edit').style.display = 'flex'; }
+        function saveEdit() { const id = document.getElementById('edit-id').value; const col = document.getElementById('edit-col').value; db.collection(col).doc(id).update({ grade: document.getElementById('edit-grade').value, month: document.getElementById('edit-month').value, type: document.getElementById('edit-type').value }).then(() => { document.getElementById('modal-edit').style.display = 'none'; Swal.fire('تم التعديل', '', 'success'); loadManageData('all'); }); }
+
+        function loadStudentResults() { const tbody = document.getElementById('results-body'); tbody.innerHTML = '<tr><td colspan="6">جاري التحميل...</td></tr>'; db.collection("results").get().then(snap => { let docs = []; snap.forEach(d => docs.push({id: d.id, ...d.data()})); docs.sort((a,b) => new Date(b.date) - new Date(a.date)); tbody.innerHTML = docs.map(r => `<tr><td>${new Date(r.date).toLocaleDateString('ar-EG')}</td><td>${r.name}</td><td>${gradeNames[r.grade]}</td><td>${r.examType}</td><td style="color:${(r.score/r.total)>=0.7?'green':'red'}">${r.score}/${r.total}</td><td><button class="btn-small-danger" onclick="delRes('${r.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('') || '<tr><td colspan="6">لا توجد نتائج</td></tr>'; }); }
+        function delRes(id) { if(confirm("حذف هذه النتيجة؟")) db.collection("results").doc(id).delete().then(() => loadStudentResults()); }
+        function clearResults() { if(confirm("مسح كل النتائج نهائياً؟")) { db.collection("results").get().then(snap => { const batch = db.batch(); snap.forEach(d => batch.delete(d.ref)); batch.commit().then(() => loadStudentResults()); }); } }
+
+        function loadSettings() { db.collection("settings").doc("site_info").get().then(s => { if(s.exists) { const d = s.data(); document.getElementById('set-title').value = d.title || ""; document.getElementById('set-subtitle').value = d.subtitle || ""; document.getElementById('set-logo').value = d.logo || ""; document.getElementById('set-welcome-msg').value = d.welcome || ""; document.getElementById('set-wa').value = d.wa || ""; document.getElementById('set-tele').value = d.tele || ""; document.getElementById('set-face').value = d.face || ""; document.getElementById('set-tiktok').value = d.tiktok || ""; } }); db.collection("settings").doc("app_config").get().then(a => { if(a.exists) { const d = a.data(); document.getElementById('admin-app-url').value = d.download_url || ""; document.getElementById('admin-show-banner').checked = d.show_banner || false; document.getElementById('admin-update-msg').value = d.update_msg || ""; } }); }
+        function saveSiteSettings() { showLoader(); let wa = document.getElementById('set-wa').value; if(wa && !wa.startsWith('http')) wa = `https://wa.me/20${wa.replace(/^0+/,'')}`; const batch = db.batch(); batch.set(db.collection("settings").doc("site_info"), { title: document.getElementById('set-title').value, subtitle: document.getElementById('set-subtitle').value, logo: document.getElementById('set-logo').value, welcome: document.getElementById('set-welcome-msg').value, wa: wa, tele: document.getElementById('set-tele').value, face: document.getElementById('set-face').value, tiktok: document.getElementById('set-tiktok').value }, {merge: true}); batch.set(db.collection("settings").doc("app_config"), { download_url: document.getElementById('admin-app-url').value, show_banner: document.getElementById('admin-show-banner').checked, update_msg: document.getElementById('admin-update-msg').value }, {merge: true}); batch.commit().then(() => Swal.fire('تم الحفظ', '', 'success')).finally(() => hideLoader()); }
+    </script> 
  
 </body></html>
